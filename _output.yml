@@ -18,7 +18,7 @@ bookdown::gitbook:
          </a>
         <li><center><strong><a href="./"><br>Single Cell RNA-seq Analysis<br><br></a></strong></center></li>
         <a href="./">
-         <img src="img/missingimg.png" width="70%" alt="Single Cell RNA-seq Analysis logo" style="display:block; margin-left:auto; margin-right:auto; ">
+         <img src="img/scrna-logo.png" width="70%" alt="Single Cell RNA-seq Analysis logo" style="display:block; margin-left:auto; margin-right:auto; ">
          </a>
         <br>
 
@@ -31,8 +31,9 @@ bookdown::gitbook:
         <a href="https://www.ontariogenomics.ca/"><img src="img/sponsors/ontariogenomics.png" height="55" style="display:inline-block;" style="padding-bottom: 20px;" alt="Ontario Genomics logo.">
         <br><br>
         <a href="https://oicr.on.ca/"><img src="img/sponsors/oicr.png" width=35% style="display:inline-block;" style="padding-bottom: 20px" alt="Ontario Institute for Cancer Research logo.">
-
-
+        <a href="https://umanitoba.ca/"><img src="img/sponsors/umlogo.png" width=35% style="display:inline-block;" style="padding-bottom: 30px" alt="Ontario Institute for University of Manitoba.">
+        <a href="https://uhn.ca/"><img src="img/sponsors/uhnlogo.png" width=35% style="display:inline-block;" style="padding-bottom: 20px" alt="Ontario Institute for University Health Network.">
+        <a href="https://usask.ca/"><img src="img/sponsors/uoslogo.png" width=35% style="display:inline-block;" style="padding-bottom: 20px" alt="Ontario Institute for University of Saskatchewan.">
     edit: https://github.com/bioinformaticsdotca/scRNA_WinTo-2606/blob/main/%s
 
     download: ["pdf", "epub"]
