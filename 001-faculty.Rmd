@@ -1,14 +1,51 @@
 # Meet Your Faculty
 
-<!--#### NAME
+#### Alyona Ivanova
 
-<img src="./img/faculty/MISSINGHEADSHOT.PNG" width="200" alt="Photo of NAME">
+<img src="./img/faculty/Alyona-Ivanova.JPG" width="200" alt="Photo of Alyona Ivanova">
 
->JOB TITLE <br>
-INSTITUTION <br>
-LOCATION
+>PhD candidate <br>
+University of Toronto, the Hospital for Sick Children <br>
+Toronto, ON, Canada <br>
+alyona.ivanova@mail.utoronto.ca
 >
-> --- CONTACT INFO, IF PROVIDED
 
-BIO GOES HERE-->
+Alyona is a graduate student at the University of Toronto pursuing PhD in Medical Sciences. Her research focuses on identifying novel therapies for targeting chemo-resistance in glioblastoma using spatial ‘omics technologies. She works in close collaboration with clinicians, neuropathologists, scientists bridging the gap between clinical practice and fundamental lab research. Alyona is a Creative Director of Panoramics - A Vision, and an Executive Editor and Director of Distribution of the Institute of Medical Sciences Magazine. 
+
+
+#### Chaitra Sarathy, PhD
+
+<img src="./img/faculty/Chaitra-Sarathy.jpg" width="200" alt="Photo of Chaitra Sarathy">
+
+>Bioinformatics Specialist, Neuron2Brain Lab (https://neurontobrainlaboratory.ca/) <br>
+Krembil Research Institute, University Health Network <br>
+Toronto, ON, Canada
+>
+
+Dr. Sarathy is Bioinformatics Researcher specializing in mathematical modeling and multi-omics integration, including bulk and single-cell RNA-seq analysis. Over the years, she has developed open-source, reproducible workflows for target discovery and machine learning models for patient stratification. Currently, she leads bioinformatics efforts at N2BL in Krembil Research Institute (https://neurontobrainlaboratory.ca/) focused on integrating multi-modal data to uncover disease mechanisms underlying neurological diseases. As a certified Carpentries Instructor, she is passionate about teaching and helping researchers build confidence in analyzing high-dimensional omics data. She likes to draw on her experiences across the software industry, academic research, and clinical settings to make her teaching practical and grounded in real-world scientific questions. 
+
+#### Tallulah Andrews, PhD
+
+<img src="./img/faculty/Tallulah-Andrews.png" width="200" alt="Photo of Tallulah Andrews">
+
+>Assistant Professor <br>
+University of Western Ontario <br>
+Toronto, ON, Canada
+>
+
+Dr. Tallulah Andrews is an Assistant Professor in the Department of Biochemistry at the University of Western Ontario. Her group focuses on the integration of biological imaging and multiple -omics technologies to understand the structure of diseased tissues. She is a long-term member of the Human Cell Atlas developing computational tools for single-cell RNAseq data while a post-doc at the Wellcome Sanger Institute in Cambridge, UK and analyzing the Healthy Liver atlas in the MacParland group at UHN Research. She holds a PhD from the University of Oxford where she used systems biology approaches to identify biological pathways underlying rare genetic diseases.
+
+#### Zhibin Lu (he/his)
+
+<img src="./img/faculty/Zhibin-Lu.jpeg" width="200" alt="Photo of Zhibin Lu">
+
+>Senior Manager, Digital Research <br>
+University Health Network <br>
+Toronto, ON, Canada <br>
+zhibin@gmail.com 
+>
+
+Zhibin Lu is a senior manager at University Health Network Digital. He is responsible for UHN HPC operations and scientific software. He manages two HPC clusters at UHN, including system administration, user management, and maintenance of bioinformatics tools for HPC4health. He is also skilled in Next-Gen sequence data analysis and has developed and maintained bioinformatics pipelines at the Bioinformatics and HPC Core. He is a member of the Digital Research Alliance of Canada Bioinformatics National Team and Scheduling National Team.
+
+
 
