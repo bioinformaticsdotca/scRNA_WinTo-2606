@@ -22,7 +22,7 @@ Welcome to the 2026 Single Cell RNA-seq Analysis Canadian Bioinformatics Worksho
 
 ## Pre-work
 
-<!--[You can find your pre-work here.](LINK TO PREWORK)-->
+Please complete this [form](https://forms.gle/VjYyBjdEH8iacWLP6) by May 29, 2026.
 
 ## Class Photo
 
