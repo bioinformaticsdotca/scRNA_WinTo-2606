@@ -283,7 +283,7 @@ Rerun DoubletFinger using pN=0.25 and pK=0.2. How does this change your results?
 3) What is the correlation between the pANN between the two runs? (Hint: the `cor()` function calculates correlations between two vectors.)
 :::
 
-::note
+:::note
 ***Bonus Exercise***
 
 Perform QC on the Mouse inner ear data. How different are the thresholds you used for this dataset to those you used for the Human Liver?
