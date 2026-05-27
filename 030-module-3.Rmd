@@ -4,3 +4,228 @@
 
 
 ## Lab
+
+
+
+```{r, eval=FALSE}
+library(knitr)
+opts_chunk$set(cache = TRUE, out.width='100%', fig.align = 'center')
+```
+
+### Normalizing scRNA-seq Datasets
+
+Despite the fact that we are using unique molecular identifiers to count distinct mRNA molecules observed in each cell, the total amount of UMIs observed are a poor estimate of the total amount of RNA in that cell. This is because of variability introduced at various stages of the experimental protocol:
+- Cell size / quality
+- Transcript capture efficiency by poly-T probes
+- Reverse transcription efficiency
+- PCR efficiency
+- Sampling noise of sequencing
+
+As a result, the absolute value of our gene expression counts is not meaningful in most cases : a cell with twice as many gene expression counts did not necessarily contain twice as much mRNA. Instead only relative values are meaningful thus we normalize the data to remove the effect of total expression counts.
+
+:::note
+Since we saved our QCed object after finishing the last step we can simply reload them to pick up where we left off.
+```{r, eval=FALSE}
+seur_obj_filtered <- readRDS("Liver_QC_Seurat.rds")
+library(SingleCellExperiment)
+library(DropletUtils)
+library(Seurat)
+library(scater)
+```
+:::
+
+#### Converting to SingleCellExperiment
+Some of our normalization methods run on SingleCellExperiment objects rather than Seurat, fortunately we can convert from one to the other relatively easily. 
+
+```{r, eval=FALSE}
+sce_filtered <- as.SingleCellExperiment(seur_obj_filtered)
+sce_filtered
+```
+
+#### Counts Per Million (CPM)
+
+Normalization aims to eliminate biases caused by certain cells having more total UMIs detected than others. The simplest approach is counts per million (CPM). This is performed as the default for `Seurat::NormalizeData()` and `scuttle::logNormCounts()` (for SCE objects). 
+
+Originally CPM would rescale each sample to 1 million total reads. Most single cells have total counts closer to 10,000 - which is what `Seurat` uses to rescale each sample to (However, this can vary depending on your chosen sequencing depth and sample type). In contrast, by default `scuttle` rescales each cell to the average total counts per cell for your particular sample.
+
+
+```{r, eval=FALSE}
+sce_filtered <- scuttle::logNormCounts(sce_filtered)
+seur_obj_filtered <- NormalizeData(seur_obj_filtered)
+```
+
+Let's check if Seurat's 10,000 counts / cell is a good approximation for this dataset.
+```{r, eval=FALSE}
+summary(seur_obj_filtered@meta.data$nCount_RNA)
+```
+
+3/4 of the cells have fewer than 4,000 UMIs so 10,000 a bit too high for this dataset. We could adjust this parameter as so:
+
+```{r, eval=FALSE}
+seur_obj_filtered <- NormalizeData(seur_obj_filtered, scale.factor=3000)
+```
+
+We will use PCA to visualize the effect of these normalizations. Note that PCA assumes data generally follow a normal distribution, which we can mimic in our data by log transforming it. Both scuttle and Seurat will automatically log transform our normalized data.
+
+We'll have to do the lognormalization manually for the raw data though. We add a "+1" because the log of 0 is negative infinity, and of any number between 0-1 is negative. It doesn't make much sense for expression values to be negative, so we add +1 so that 0 counts becomes 0 log-counts. 
+
+First let's see what the data looks like prior to normalization.
+```{{r, eval=FALSE}
+assay(sce_filtered, "logcounts_raw") <- log2(counts(sce_filtered) + 1)
+sce_filtered <- scater::runPCA(sce_filtered, exprs_values = "logcounts_raw")
+
+plotPCA(sce_filtered, colour_by = "nCount_RNA", size_by = "nFeature_RNA")
+```
+Here you can see the first principal component which represents 34% of the total variance in the data is driven by the total counts / total detected genes.
+
+
+```{r, eval=FALSE}
+sce_filtered <- scater::runPCA(sce_filtered)
+scater::plotPCA(sce_filtered, colour_by = "nCount_RNA", size_by = "nFeature_RNA")
+```
+Now we see that normalization has largely removed the association of the top principal component with total UMIs.
+
+:::Exercise 1
+What is the average total expression per cell after normalization with scuttle or with Seurat?
+
+Hint: Seurat stores normalized data in the `data` slot of the assay. And scuttle stores it in `logcounts` of the SCE.
+:::
+
+
+#### Scran
+```{r, eval=FALSE}
+require(scran)
+```
+
+If our data has a few highly expressed genes that are also differentially expressed in our dataset, this will create biases in CPM. There are many fixes to this available for bulk RNAseq but they assume every gene is detected in every cell. To allow these methods to be used for single-cell data Lun et al. developed `scran` which pools cells together into artificial bulk RNAseq before calculating the normalization factors. Finally it deconvolves those factor back into single-cell factors.
+
+```{r, eval=FALSE}
+qclust <- quickCluster(sce_filtered, min.size = 30) # 30 = number of cells per pool
+sce_filtered <- computeSumFactors(sce_filtered, clusters = qclust)
+sce_filtered <- scater::logNormCounts(sce_filtered)
+```
+
+We can see how that has changed our data using PCA again:
+```{r, eval=FALSE}
+sce_filtered <- runPCA(sce_filtered)
+plotPCA(sce_filtered, colour_by = "nCount_RNA", size_by = "nFeature_RNA")
+```
+
+#### Pearson Residuals
+
+Recent publications have suggested using Pearson Residuals, which are effectively Z-scores but for any type of distribution rather than specifically for a normal distribution. i.e. pr = (X - mean)/sqrt(var)
+
+We can use M3Drop to fit a Negative Binomial distribution that accounts for differences in sequencing depth to our raw UMI counts, and then calculate Pearson residuals with respect to this distribution. Because this approach accounts for the variance of the data, we do not need to log transform it.
+
+
+```{r, eval=FALSE}
+require("M3Drop") # Note Pearson residuals is only available in the github (development) version of M3Drop at present.
+fit <- NBumiFitModel(counts(sce_filtered))
+pr <- NBumiPearsonResiduals(counts(sce_filtered), fit)
+assay(sce_filtered, "pearson") <- pr
+sce_filtered <- runPCA(sce_filtered, exprs_values="pearson")
+plotPCA(sce_filtered, colour_by = "nCount_RNA", size_by = "nFeature_RNA", ncomponents=1:2)
+```
+Here we can see that this PCA is performing poorly on the pearson residuals, this is because by default our PCA method is using the top 500 most variable genes. Usually these are among the most highly expressed genes, however when we scale with Pearson residuals very lowly expressed genes can end up with high variances.
+
+```{r, eval=FALSE}
+mean_counts <- apply(counts(sce_filtered), 1, mean);
+pr_var <- apply(pr, 1, var);
+
+plot(mean_counts, pr_var, xlab="Mean UMI counts", ylab="Residual Variance");
+```
+Thus we can 'fix' our Pearson Residual PCA by telling our PCA method to use the most highly expressed genes instead.
+
+```{r, eval=FALSE}
+top_expressed_genes <- tail(sort(mean_counts), 500)
+sce_filtered <- runPCA(sce_filtered, exprs_values="pearson", subset_row = names(top_expressed_genes))
+plotPCA(sce_filtered, colour_by = "nCount_RNA", size_by = "nFeature_RNA", ncomponents=1:2)
+```
+Now our PCA is back showing we have reduced the effect of library size.
+
+:::note
+Fitting the negative binomial distribution to each gene requires much more computational effort than the previous methods.
+:::
+
+:::Exercise 2
+What is the maximum, minimum, and average normalized expression for the "ALB" gene using scran normalization vs Pearson residuals? (hint: use the `summary()` function)
+:::
+
+#### SCTransform
+
+Seurat includes an alternative normalization method which directly addresses the specific issue with library size that we see in single-cell data by taking each gene and preforming a regression (assuming negative binomial noise) against total number of UMIs for each cell. 
+
+You can optionally include other meta.data features, such as mt.percent or batches. To speed up calculations Seurat groups genes together based on their overall expression level to perform this regression and only calculates it explicitly for 2000 genes and uses those parameters to guess how to normalize the rest of the genes .
+```{r, eval=FALSE}
+require(Seurat)
+seur_obj_filtered <- SCTransform(seur_obj_filtered, return.only.var.genes = FALSE)
+seur_obj_filtered@assays
+DefaultAssay(seur_obj_filtered)
+```
+Here we can see that running SCTransform generates an entire new "assay" which will contain it's own counts, data, and scale.data matrices. The contents of these matrices depends on which version of Seurat you are using. For the most recent version counts are "corrected" counts, data is log transformed counts, and scale.data is Pearson residuals. Note that "corrected" counts are from reversing the regression model to estimate what the values should be if the cell was not affected by any of the factors we regressed out.
+
+```{r, eval=FALSE}
+par(mfrow=c(1,2))
+plot(seur_obj_filtered@meta.data$nFeature_RNA, seur_obj_filtered@meta.data$nFeature_SCT, xlab="raw ngenes", ylab="SCT ngenes")
+abline(a=0,b=1, col="red", lwd=2)
+
+plot(seur_obj_filtered@meta.data$nCount_RNA, seur_obj_filtered@meta.data$nCount_SCT, xlab="raw nUMI", ylab="SCT nUMI", log="xy")
+abline(a=0,b=1, col="red", lwd=2)
+```
+SCT counts are obtained by reversing the regression model while fixing the predicted variables across cells - i.e. all cells are assumed to have the same sequencing depth, thus "flattening" the spread of total UMIs across cells. However, as the correction is constrained such that a gene's expression cannot be < 0 it cannot fully "flatten" the effect of library size. In addition, as genes are binned by expression level to simplify the model fitting this can produce "jump" distortions as we see in the plot on the right.
+
+*Note: These distortions mean our data no longer fits a Negative Binomial model, thus SCT counts should not be used to replace raw counts for any method based on a negative binomial model. Indeed the SCT counts should not be used for anything, but Pearson residuals are useful.*
+
+
+```{r, eval=FALSE}
+par(mfrow=c(1,1))
+plot(seur_obj_filtered@meta.data$nCount_RNA, seur_obj_filtered@meta.data$nFeature_RNA, xlab="nUMI", ylab="nGenes", log="xy")
+points(seur_obj_filtered@meta.data$nCount_SCT, seur_obj_filtered@meta.data$nFeature_SCT, col="blue")
+
+```
+SCTransform also can distort the relationship between the total UMIs and the total genes detected.  
+
+We can look at a PCA to compare the LogNormalized vs SCT normalization. Seurat requires gene expression to be scaled to have a mean = 0 and sd = 1 prior to calculating PCA. SCT does this automatically, but for LogNormalization we need an additional step:
+
+```{r, eval=FALSE}
+seur_obj_filtered <- ScaleData(seur_obj_filtered, assay="RNA")
+```
+Unlike in scater, we also must provide Seurat with a set of genes to consider for the PCA. We can use the same ones we used for the Person residuals above, but we need change them into gene symbols for Seurat first.
+
+```{r, eval=FALSE}
+pca_genes_symbol <- names(top_expressed_genes)
+```
+
+Now we can run PCA in Seurat.
+
+```{r, eval=FALSE}
+seur_obj_filtered <- RunPCA(seur_obj_filtered, assay="RNA", features=pca_genes_symbol)
+FeaturePlot(seur_obj_filtered, reduction="pca", features="nCount_RNA")
+```
+
+
+```{r, eval=FALSE}
+seur_obj_filtered <- RunPCA(seur_obj_filtered, assay="SCT", features=pca_genes_symbol)
+FeaturePlot(seur_obj_filtered, reduction="pca", features="nCount_RNA")
+```
+
+Here you can see the SCT has a significantly different effect compared to the other normalization approaches, and may be better for identifying cell-types.
+
+:::Exercise 3
+What is the maximum, minimum, and average normalized expression for the "ALB" gene in raw counts, lognormalized expression, SCT counts, SCT lognormalized expression, SCT pearson residuals? (hint: use the "summary()" function)
+How do these compare to the normalized values we saw for NBumi and scran above?
+:::
+
+::note
+***Bonus Exercise:***
+
+Normalize the Mouse Ear dataset using one of the normalization methods above.
+:::
+
+:::note
+Another advantage to storing all our data & results into a single R object, is that it is easy to save our work and come back to it later. While you can save your entire workspace in R to pick up again later that is inefficient as many temporary variables you've forgotten about, and packages you aren't using anymore will be saved along with your data. Thus, I recommend saving just your SingleCellExperiment or Seurat Objects when you finish a significant step of your analysis to comeback to if you need to rerun or change something later.
+```{r, eval=FALSE}
+saveRDS(seur_obj_filtered, "Liver_QC_Norm_Seurat.rds")
+```
+:::
+

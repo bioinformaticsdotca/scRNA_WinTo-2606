@@ -201,7 +201,10 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="" data-path="module-3.html"><a href="module-3.html"><i class="fa fa-check"></i>Module 3</a>
 <ul>
 <li class="chapter" data-level="" data-path="module-3.html"><a href="module-3.html#lecture-2"><i class="fa fa-check"></i>Lecture</a></li>
-<li class="chapter" data-level="" data-path="module-3.html"><a href="module-3.html#lab-2"><i class="fa fa-check"></i>Lab</a></li>
+<li class="chapter" data-level="" data-path="module-3.html"><a href="module-3.html#lab-2"><i class="fa fa-check"></i>Lab</a>
+<ul>
+<li class="chapter" data-level="" data-path="module-3.html"><a href="module-3.html#normalizing-scrna-seq-datasets"><i class="fa fa-check"></i>Normalizing scRNA-seq Datasets</a></li>
+</ul></li>
 </ul></li>
 <li class="chapter" data-level="" data-path="module-4.html"><a href="module-4.html"><i class="fa fa-check"></i>Module 4</a>
 <ul>
@@ -271,7 +274,145 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </div>
 <div id="lab-2" class="section level2 hasAnchor">
 <h2>Lab<a href="module-3.html#lab-2" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<div class="sourceCode" id="cb51"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb51-1"><a href="module-3.html#cb51-1" tabindex="-1"></a><span class="fu">library</span>(knitr)</span>
+<span id="cb51-2"><a href="module-3.html#cb51-2" tabindex="-1"></a>opts_chunk<span class="sc">$</span><span class="fu">set</span>(<span class="at">cache =</span> <span class="cn">TRUE</span>, <span class="at">out.width=</span><span class="st">&#39;100%&#39;</span>, <span class="at">fig.align =</span> <span class="st">&#39;center&#39;</span>)</span></code></pre></div>
+<div id="normalizing-scrna-seq-datasets" class="section level3 hasAnchor">
+<h3>Normalizing scRNA-seq Datasets<a href="module-3.html#normalizing-scrna-seq-datasets" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>Despite the fact that we are using unique molecular identifiers to count distinct mRNA molecules observed in each cell, the total amount of UMIs observed are a poor estimate of the total amount of RNA in that cell. This is because of variability introduced at various stages of the experimental protocol:
+- Cell size / quality
+- Transcript capture efficiency by poly-T probes
+- Reverse transcription efficiency
+- PCR efficiency
+- Sampling noise of sequencing</p>
+<p>As a result, the absolute value of our gene expression counts is not meaningful in most cases : a cell with twice as many gene expression counts did not necessarily contain twice as much mRNA. Instead only relative values are meaningful thus we normalize the data to remove the effect of total expression counts.</p>
+<div class="note">
+<p>Since we saved our QCed object after finishing the last step we can simply reload them to pick up where we left off.</p>
+<div class="sourceCode" id="cb52"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb52-1"><a href="module-3.html#cb52-1" tabindex="-1"></a>seur_obj_filtered <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="st">&quot;Liver_QC_Seurat.rds&quot;</span>)</span>
+<span id="cb52-2"><a href="module-3.html#cb52-2" tabindex="-1"></a><span class="fu">library</span>(SingleCellExperiment)</span>
+<span id="cb52-3"><a href="module-3.html#cb52-3" tabindex="-1"></a><span class="fu">library</span>(DropletUtils)</span>
+<span id="cb52-4"><a href="module-3.html#cb52-4" tabindex="-1"></a><span class="fu">library</span>(Seurat)</span>
+<span id="cb52-5"><a href="module-3.html#cb52-5" tabindex="-1"></a><span class="fu">library</span>(scater)</span></code></pre></div>
+</div>
+<div id="converting-to-singlecellexperiment" class="section level4 hasAnchor">
+<h4>Converting to SingleCellExperiment<a href="module-3.html#converting-to-singlecellexperiment" class="anchor-section" aria-label="Anchor link to header"></a></h4>
+<p>Some of our normalization methods run on SingleCellExperiment objects rather than Seurat, fortunately we can convert from one to the other relatively easily.</p>
+<div class="sourceCode" id="cb53"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb53-1"><a href="module-3.html#cb53-1" tabindex="-1"></a>sce_filtered <span class="ot">&lt;-</span> <span class="fu">as.SingleCellExperiment</span>(seur_obj_filtered)</span>
+<span id="cb53-2"><a href="module-3.html#cb53-2" tabindex="-1"></a>sce_filtered</span></code></pre></div>
+</div>
+<div id="counts-per-million-cpm" class="section level4 hasAnchor">
+<h4>Counts Per Million (CPM)<a href="module-3.html#counts-per-million-cpm" class="anchor-section" aria-label="Anchor link to header"></a></h4>
+<p>Normalization aims to eliminate biases caused by certain cells having more total UMIs detected than others. The simplest approach is counts per million (CPM). This is performed as the default for <code>Seurat::NormalizeData()</code> and <code>scuttle::logNormCounts()</code> (for SCE objects).</p>
+<p>Originally CPM would rescale each sample to 1 million total reads. Most single cells have total counts closer to 10,000 - which is what <code>Seurat</code> uses to rescale each sample to (However, this can vary depending on your chosen sequencing depth and sample type). In contrast, by default <code>scuttle</code> rescales each cell to the average total counts per cell for your particular sample.</p>
+<div class="sourceCode" id="cb54"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb54-1"><a href="module-3.html#cb54-1" tabindex="-1"></a>sce_filtered <span class="ot">&lt;-</span> scuttle<span class="sc">::</span><span class="fu">logNormCounts</span>(sce_filtered)</span>
+<span id="cb54-2"><a href="module-3.html#cb54-2" tabindex="-1"></a>seur_obj_filtered <span class="ot">&lt;-</span> <span class="fu">NormalizeData</span>(seur_obj_filtered)</span></code></pre></div>
+<p>Let’s check if Seurat’s 10,000 counts / cell is a good approximation for this dataset.</p>
+<div class="sourceCode" id="cb55"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb55-1"><a href="module-3.html#cb55-1" tabindex="-1"></a><span class="fu">summary</span>(seur_obj_filtered<span class="sc">@</span>meta.data<span class="sc">$</span>nCount_RNA)</span></code></pre></div>
+<p>3/4 of the cells have fewer than 4,000 UMIs so 10,000 a bit too high for this dataset. We could adjust this parameter as so:</p>
+<div class="sourceCode" id="cb56"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb56-1"><a href="module-3.html#cb56-1" tabindex="-1"></a>seur_obj_filtered <span class="ot">&lt;-</span> <span class="fu">NormalizeData</span>(seur_obj_filtered, <span class="at">scale.factor=</span><span class="dv">3000</span>)</span></code></pre></div>
+<p>We will use PCA to visualize the effect of these normalizations. Note that PCA assumes data generally follow a normal distribution, which we can mimic in our data by log transforming it. Both scuttle and Seurat will automatically log transform our normalized data.</p>
+<p>We’ll have to do the lognormalization manually for the raw data though. We add a “+1” because the log of 0 is negative infinity, and of any number between 0-1 is negative. It doesn’t make much sense for expression values to be negative, so we add +1 so that 0 counts becomes 0 log-counts.</p>
+<p>First let’s see what the data looks like prior to normalization.
+```{{r, eval=FALSE}
+assay(sce_filtered, “logcounts_raw”) &lt;- log2(counts(sce_filtered) + 1)
+sce_filtered &lt;- scater::runPCA(sce_filtered, exprs_values = “logcounts_raw”)</p>
+<p>plotPCA(sce_filtered, colour_by = “nCount_RNA”, size_by = “nFeature_RNA”)</p>
+<pre><code>Here you can see the first principal component which represents 34% of the total variance in the data is driven by the total counts / total detected genes.
 
+
+
+``` r
+sce_filtered &lt;- scater::runPCA(sce_filtered)
+scater::plotPCA(sce_filtered, colour_by = &quot;nCount_RNA&quot;, size_by = &quot;nFeature_RNA&quot;)</code></pre>
+<p>Now we see that normalization has largely removed the association of the top principal component with total UMIs.</p>
+<p>:::Exercise 1
+What is the average total expression per cell after normalization with scuttle or with Seurat?</p>
+<p>Hint: Seurat stores normalized data in the <code>data</code> slot of the assay. And scuttle stores it in <code>logcounts</code> of the SCE.
+:::</p>
+</div>
+<div id="scran" class="section level4 hasAnchor">
+<h4>Scran<a href="module-3.html#scran" class="anchor-section" aria-label="Anchor link to header"></a></h4>
+<div class="sourceCode" id="cb58"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb58-1"><a href="module-3.html#cb58-1" tabindex="-1"></a><span class="fu">require</span>(scran)</span></code></pre></div>
+<p>If our data has a few highly expressed genes that are also differentially expressed in our dataset, this will create biases in CPM. There are many fixes to this available for bulk RNAseq but they assume every gene is detected in every cell. To allow these methods to be used for single-cell data Lun et al. developed <code>scran</code> which pools cells together into artificial bulk RNAseq before calculating the normalization factors. Finally it deconvolves those factor back into single-cell factors.</p>
+<div class="sourceCode" id="cb59"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb59-1"><a href="module-3.html#cb59-1" tabindex="-1"></a>qclust <span class="ot">&lt;-</span> <span class="fu">quickCluster</span>(sce_filtered, <span class="at">min.size =</span> <span class="dv">30</span>) <span class="co"># 30 = number of cells per pool</span></span>
+<span id="cb59-2"><a href="module-3.html#cb59-2" tabindex="-1"></a>sce_filtered <span class="ot">&lt;-</span> <span class="fu">computeSumFactors</span>(sce_filtered, <span class="at">clusters =</span> qclust)</span>
+<span id="cb59-3"><a href="module-3.html#cb59-3" tabindex="-1"></a>sce_filtered <span class="ot">&lt;-</span> scater<span class="sc">::</span><span class="fu">logNormCounts</span>(sce_filtered)</span></code></pre></div>
+<p>We can see how that has changed our data using PCA again:</p>
+<div class="sourceCode" id="cb60"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb60-1"><a href="module-3.html#cb60-1" tabindex="-1"></a>sce_filtered <span class="ot">&lt;-</span> <span class="fu">runPCA</span>(sce_filtered)</span>
+<span id="cb60-2"><a href="module-3.html#cb60-2" tabindex="-1"></a><span class="fu">plotPCA</span>(sce_filtered, <span class="at">colour_by =</span> <span class="st">&quot;nCount_RNA&quot;</span>, <span class="at">size_by =</span> <span class="st">&quot;nFeature_RNA&quot;</span>)</span></code></pre></div>
+</div>
+<div id="pearson-residuals" class="section level4 hasAnchor">
+<h4>Pearson Residuals<a href="module-3.html#pearson-residuals" class="anchor-section" aria-label="Anchor link to header"></a></h4>
+<p>Recent publications have suggested using Pearson Residuals, which are effectively Z-scores but for any type of distribution rather than specifically for a normal distribution. i.e. pr = (X - mean)/sqrt(var)</p>
+<p>We can use M3Drop to fit a Negative Binomial distribution that accounts for differences in sequencing depth to our raw UMI counts, and then calculate Pearson residuals with respect to this distribution. Because this approach accounts for the variance of the data, we do not need to log transform it.</p>
+<div class="sourceCode" id="cb61"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb61-1"><a href="module-3.html#cb61-1" tabindex="-1"></a><span class="fu">require</span>(<span class="st">&quot;M3Drop&quot;</span>) <span class="co"># Note Pearson residuals is only available in the github (development) version of M3Drop at present.</span></span>
+<span id="cb61-2"><a href="module-3.html#cb61-2" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">NBumiFitModel</span>(<span class="fu">counts</span>(sce_filtered))</span>
+<span id="cb61-3"><a href="module-3.html#cb61-3" tabindex="-1"></a>pr <span class="ot">&lt;-</span> <span class="fu">NBumiPearsonResiduals</span>(<span class="fu">counts</span>(sce_filtered), fit)</span>
+<span id="cb61-4"><a href="module-3.html#cb61-4" tabindex="-1"></a><span class="fu">assay</span>(sce_filtered, <span class="st">&quot;pearson&quot;</span>) <span class="ot">&lt;-</span> pr</span>
+<span id="cb61-5"><a href="module-3.html#cb61-5" tabindex="-1"></a>sce_filtered <span class="ot">&lt;-</span> <span class="fu">runPCA</span>(sce_filtered, <span class="at">exprs_values=</span><span class="st">&quot;pearson&quot;</span>)</span>
+<span id="cb61-6"><a href="module-3.html#cb61-6" tabindex="-1"></a><span class="fu">plotPCA</span>(sce_filtered, <span class="at">colour_by =</span> <span class="st">&quot;nCount_RNA&quot;</span>, <span class="at">size_by =</span> <span class="st">&quot;nFeature_RNA&quot;</span>, <span class="at">ncomponents=</span><span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>)</span></code></pre></div>
+<p>Here we can see that this PCA is performing poorly on the pearson residuals, this is because by default our PCA method is using the top 500 most variable genes. Usually these are among the most highly expressed genes, however when we scale with Pearson residuals very lowly expressed genes can end up with high variances.</p>
+<div class="sourceCode" id="cb62"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb62-1"><a href="module-3.html#cb62-1" tabindex="-1"></a>mean_counts <span class="ot">&lt;-</span> <span class="fu">apply</span>(<span class="fu">counts</span>(sce_filtered), <span class="dv">1</span>, mean);</span>
+<span id="cb62-2"><a href="module-3.html#cb62-2" tabindex="-1"></a>pr_var <span class="ot">&lt;-</span> <span class="fu">apply</span>(pr, <span class="dv">1</span>, var);</span>
+<span id="cb62-3"><a href="module-3.html#cb62-3" tabindex="-1"></a></span>
+<span id="cb62-4"><a href="module-3.html#cb62-4" tabindex="-1"></a><span class="fu">plot</span>(mean_counts, pr_var, <span class="at">xlab=</span><span class="st">&quot;Mean UMI counts&quot;</span>, <span class="at">ylab=</span><span class="st">&quot;Residual Variance&quot;</span>);</span></code></pre></div>
+<p>Thus we can ‘fix’ our Pearson Residual PCA by telling our PCA method to use the most highly expressed genes instead.</p>
+<div class="sourceCode" id="cb63"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb63-1"><a href="module-3.html#cb63-1" tabindex="-1"></a>top_expressed_genes <span class="ot">&lt;-</span> <span class="fu">tail</span>(<span class="fu">sort</span>(mean_counts), <span class="dv">500</span>)</span>
+<span id="cb63-2"><a href="module-3.html#cb63-2" tabindex="-1"></a>sce_filtered <span class="ot">&lt;-</span> <span class="fu">runPCA</span>(sce_filtered, <span class="at">exprs_values=</span><span class="st">&quot;pearson&quot;</span>, <span class="at">subset_row =</span> <span class="fu">names</span>(top_expressed_genes))</span>
+<span id="cb63-3"><a href="module-3.html#cb63-3" tabindex="-1"></a><span class="fu">plotPCA</span>(sce_filtered, <span class="at">colour_by =</span> <span class="st">&quot;nCount_RNA&quot;</span>, <span class="at">size_by =</span> <span class="st">&quot;nFeature_RNA&quot;</span>, <span class="at">ncomponents=</span><span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>)</span></code></pre></div>
+<p>Now our PCA is back showing we have reduced the effect of library size.</p>
+<div class="note">
+<p>Fitting the negative binomial distribution to each gene requires much more computational effort than the previous methods.</p>
+</div>
+<p>:::Exercise 2
+What is the maximum, minimum, and average normalized expression for the “ALB” gene using scran normalization vs Pearson residuals? (hint: use the <code>summary()</code> function)
+:::</p>
+</div>
+<div id="sctransform" class="section level4 hasAnchor">
+<h4>SCTransform<a href="module-3.html#sctransform" class="anchor-section" aria-label="Anchor link to header"></a></h4>
+<p>Seurat includes an alternative normalization method which directly addresses the specific issue with library size that we see in single-cell data by taking each gene and preforming a regression (assuming negative binomial noise) against total number of UMIs for each cell.</p>
+<p>You can optionally include other meta.data features, such as mt.percent or batches. To speed up calculations Seurat groups genes together based on their overall expression level to perform this regression and only calculates it explicitly for 2000 genes and uses those parameters to guess how to normalize the rest of the genes .</p>
+<div class="sourceCode" id="cb64"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb64-1"><a href="module-3.html#cb64-1" tabindex="-1"></a><span class="fu">require</span>(Seurat)</span>
+<span id="cb64-2"><a href="module-3.html#cb64-2" tabindex="-1"></a>seur_obj_filtered <span class="ot">&lt;-</span> <span class="fu">SCTransform</span>(seur_obj_filtered, <span class="at">return.only.var.genes =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb64-3"><a href="module-3.html#cb64-3" tabindex="-1"></a>seur_obj_filtered<span class="sc">@</span>assays</span>
+<span id="cb64-4"><a href="module-3.html#cb64-4" tabindex="-1"></a><span class="fu">DefaultAssay</span>(seur_obj_filtered)</span></code></pre></div>
+<p>Here we can see that running SCTransform generates an entire new “assay” which will contain it’s own counts, data, and scale.data matrices. The contents of these matrices depends on which version of Seurat you are using. For the most recent version counts are “corrected” counts, data is log transformed counts, and scale.data is Pearson residuals. Note that “corrected” counts are from reversing the regression model to estimate what the values should be if the cell was not affected by any of the factors we regressed out.</p>
+<div class="sourceCode" id="cb65"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb65-1"><a href="module-3.html#cb65-1" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow=</span><span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>))</span>
+<span id="cb65-2"><a href="module-3.html#cb65-2" tabindex="-1"></a><span class="fu">plot</span>(seur_obj_filtered<span class="sc">@</span>meta.data<span class="sc">$</span>nFeature_RNA, seur_obj_filtered<span class="sc">@</span>meta.data<span class="sc">$</span>nFeature_SCT, <span class="at">xlab=</span><span class="st">&quot;raw ngenes&quot;</span>, <span class="at">ylab=</span><span class="st">&quot;SCT ngenes&quot;</span>)</span>
+<span id="cb65-3"><a href="module-3.html#cb65-3" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">a=</span><span class="dv">0</span>,<span class="at">b=</span><span class="dv">1</span>, <span class="at">col=</span><span class="st">&quot;red&quot;</span>, <span class="at">lwd=</span><span class="dv">2</span>)</span>
+<span id="cb65-4"><a href="module-3.html#cb65-4" tabindex="-1"></a></span>
+<span id="cb65-5"><a href="module-3.html#cb65-5" tabindex="-1"></a><span class="fu">plot</span>(seur_obj_filtered<span class="sc">@</span>meta.data<span class="sc">$</span>nCount_RNA, seur_obj_filtered<span class="sc">@</span>meta.data<span class="sc">$</span>nCount_SCT, <span class="at">xlab=</span><span class="st">&quot;raw nUMI&quot;</span>, <span class="at">ylab=</span><span class="st">&quot;SCT nUMI&quot;</span>, <span class="at">log=</span><span class="st">&quot;xy&quot;</span>)</span>
+<span id="cb65-6"><a href="module-3.html#cb65-6" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">a=</span><span class="dv">0</span>,<span class="at">b=</span><span class="dv">1</span>, <span class="at">col=</span><span class="st">&quot;red&quot;</span>, <span class="at">lwd=</span><span class="dv">2</span>)</span></code></pre></div>
+<p>SCT counts are obtained by reversing the regression model while fixing the predicted variables across cells - i.e. all cells are assumed to have the same sequencing depth, thus “flattening” the spread of total UMIs across cells. However, as the correction is constrained such that a gene’s expression cannot be &lt; 0 it cannot fully “flatten” the effect of library size. In addition, as genes are binned by expression level to simplify the model fitting this can produce “jump” distortions as we see in the plot on the right.</p>
+<p><em>Note: These distortions mean our data no longer fits a Negative Binomial model, thus SCT counts should not be used to replace raw counts for any method based on a negative binomial model. Indeed the SCT counts should not be used for anything, but Pearson residuals are useful.</em></p>
+<div class="sourceCode" id="cb66"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb66-1"><a href="module-3.html#cb66-1" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow=</span><span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">1</span>))</span>
+<span id="cb66-2"><a href="module-3.html#cb66-2" tabindex="-1"></a><span class="fu">plot</span>(seur_obj_filtered<span class="sc">@</span>meta.data<span class="sc">$</span>nCount_RNA, seur_obj_filtered<span class="sc">@</span>meta.data<span class="sc">$</span>nFeature_RNA, <span class="at">xlab=</span><span class="st">&quot;nUMI&quot;</span>, <span class="at">ylab=</span><span class="st">&quot;nGenes&quot;</span>, <span class="at">log=</span><span class="st">&quot;xy&quot;</span>)</span>
+<span id="cb66-3"><a href="module-3.html#cb66-3" tabindex="-1"></a><span class="fu">points</span>(seur_obj_filtered<span class="sc">@</span>meta.data<span class="sc">$</span>nCount_SCT, seur_obj_filtered<span class="sc">@</span>meta.data<span class="sc">$</span>nFeature_SCT, <span class="at">col=</span><span class="st">&quot;blue&quot;</span>)</span></code></pre></div>
+<p>SCTransform also can distort the relationship between the total UMIs and the total genes detected.</p>
+<p>We can look at a PCA to compare the LogNormalized vs SCT normalization. Seurat requires gene expression to be scaled to have a mean = 0 and sd = 1 prior to calculating PCA. SCT does this automatically, but for LogNormalization we need an additional step:</p>
+<div class="sourceCode" id="cb67"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb67-1"><a href="module-3.html#cb67-1" tabindex="-1"></a>seur_obj_filtered <span class="ot">&lt;-</span> <span class="fu">ScaleData</span>(seur_obj_filtered, <span class="at">assay=</span><span class="st">&quot;RNA&quot;</span>)</span></code></pre></div>
+<p>Unlike in scater, we also must provide Seurat with a set of genes to consider for the PCA. We can use the same ones we used for the Person residuals above, but we need change them into gene symbols for Seurat first.</p>
+<div class="sourceCode" id="cb68"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb68-1"><a href="module-3.html#cb68-1" tabindex="-1"></a>pca_genes_symbol <span class="ot">&lt;-</span> <span class="fu">names</span>(top_expressed_genes)</span></code></pre></div>
+<p>Now we can run PCA in Seurat.</p>
+<div class="sourceCode" id="cb69"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb69-1"><a href="module-3.html#cb69-1" tabindex="-1"></a>seur_obj_filtered <span class="ot">&lt;-</span> <span class="fu">RunPCA</span>(seur_obj_filtered, <span class="at">assay=</span><span class="st">&quot;RNA&quot;</span>, <span class="at">features=</span>pca_genes_symbol)</span>
+<span id="cb69-2"><a href="module-3.html#cb69-2" tabindex="-1"></a><span class="fu">FeaturePlot</span>(seur_obj_filtered, <span class="at">reduction=</span><span class="st">&quot;pca&quot;</span>, <span class="at">features=</span><span class="st">&quot;nCount_RNA&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb70"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb70-1"><a href="module-3.html#cb70-1" tabindex="-1"></a>seur_obj_filtered <span class="ot">&lt;-</span> <span class="fu">RunPCA</span>(seur_obj_filtered, <span class="at">assay=</span><span class="st">&quot;SCT&quot;</span>, <span class="at">features=</span>pca_genes_symbol)</span>
+<span id="cb70-2"><a href="module-3.html#cb70-2" tabindex="-1"></a><span class="fu">FeaturePlot</span>(seur_obj_filtered, <span class="at">reduction=</span><span class="st">&quot;pca&quot;</span>, <span class="at">features=</span><span class="st">&quot;nCount_RNA&quot;</span>)</span></code></pre></div>
+<p>Here you can see the SCT has a significantly different effect compared to the other normalization approaches, and may be better for identifying cell-types.</p>
+<p>:::Exercise 3
+What is the maximum, minimum, and average normalized expression for the “ALB” gene in raw counts, lognormalized expression, SCT counts, SCT lognormalized expression, SCT pearson residuals? (hint: use the “summary()” function)
+How do these compare to the normalized values we saw for NBumi and scran above?
+:::</p>
+<p>::note
+<strong><em>Bonus Exercise:</em></strong></p>
+<p>Normalize the Mouse Ear dataset using one of the normalization methods above.
+:::</p>
+<div class="note">
+<p>Another advantage to storing all our data &amp; results into a single R object, is that it is easy to save our work and come back to it later. While you can save your entire workspace in R to pick up again later that is inefficient as many temporary variables you’ve forgotten about, and packages you aren’t using anymore will be saved along with your data. Thus, I recommend saving just your SingleCellExperiment or Seurat Objects when you finish a significant step of your analysis to comeback to if you need to rerun or change something later.</p>
+<div class="sourceCode" id="cb71"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb71-1"><a href="module-3.html#cb71-1" tabindex="-1"></a><span class="fu">saveRDS</span>(seur_obj_filtered, <span class="st">&quot;Liver_QC_Norm_Seurat.rds&quot;</span>)</span></code></pre></div>
+</div>
+
+</div>
+</div>
 </div>
 </div>
             </section>
