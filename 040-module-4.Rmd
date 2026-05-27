@@ -4,3 +4,198 @@
 
 
 ## Lab
+
+
+```{r, eval=FALSE}
+seur_obj_filtered <- readRDS("Liver_QC_Norm_Seurat.rds")
+```
+
+### Data Visualization and Dimensionality Reduction
+
+Once we have normalized and (optionally) scaled our data, we need to reduce the dimensionality of our data to remove most of the noise. First we will identify those genes that have the most signal (vs noise), then we will use PCA to combine correlated genes.
+
+#### Feature Selection
+
+In Seurat, we identify "highly variable genes". Like so:
+
+```{r, eval=FALSE}
+seur_obj_filtered <- FindVariableFeatures(seur_obj_filtered)
+top10 <- head(VariableFeatures(seur_obj_filtered), 10)
+plot1 <- VariableFeaturePlot(seur_obj_filtered)
+plot1 <- LabelPoints(plot = plot1, points = top10, repel = TRUE)
+plot1
+```
+*Note: "Residual Variance" is the variance of each gene after correcting for the general relationship between mean expression and variance.*
+
+
+By default Seurat uses the top 2000 variable features, however if you have a dataset with many cell populations you may want to increase this number like so:
+```{r, eval=FALSE}
+seur_obj_filtered <- FindVariableFeatures(seur_obj_filtered, nfeatures=3000)
+```
+You can also specify a specific set of genes such as those identified from another tool, or add/remove specific genes to the set of HVGs. Adding genes can be particularly useful for finding rare cell-types as marker genes from rare cell-types can be missed by `FindVariableFeatures()`. Removing genes is typically used to eliminate certain confounders, e.g. removing mitochondrial genes helps prevents clusters being driven by cell-quality.
+
+```{r, eval=FALSE}
+hvgs <- VariableFeatures(seur_obj_filtered)
+hvgs <- c(hvgs, "EOMES") # add a key marker of liver NK cells
+hvgs <- hvgs[!grepl("^MT-", hvgs)] # remove mitochondrial genes
+VariableFeatures(seur_obj_filtered) <- hvgs
+```
+
+If using a SingleCellExperiment object, we can use either 'M3Drop' or 'scran' to identify important genes. M3Drop uses a statistical test to ID genes with significant variation. Scran uses a different model but also provides a statistical test for significantly variable genes:
+
+```{r, eval=FALSE}
+hvg_test_m3drop <- M3Drop::NBumiFeatureSelectionCombinedDrop(fit, qval.thresh = 0.05, suppress.plot = FALSE)
+hvgs_m3drop <- hvg_test_m3drop$Gene
+length(hvgs_m3drop)
+```
+
+```{r, eval=FALSE}
+require(scran)
+hvg_model <- modelGeneVar(sce_filtered)
+
+is.hvg <- hvg_model$p.value < 0.05
+
+hvgs_scran <- rownames(hvg_model[is.hvg,])
+length(hvgs_scran)
+
+# Visualizing the fit:
+scran_fit <- metadata(hvg_model)
+plot(scran_fit$mean, scran_fit$var, xlab="Mean of log-expression",
+    ylab="Variance of log-expression")
+curve(scran_fit$trend(x), col="dodgerblue", add=TRUE, lwd=2)
+points(scran_fit$mean[is.hvg], scran_fit$var[is.hvg], pch=16, col="red")
+```
+
+::: Exercise 1
+What is the overlap in features selected using M3Drop vs scran?
+What is the overlap in features selected using M3Drop or scran vs Seurat? (Hint: use the rowData of the SingleCellExperiment object to change gene IDs)
+Hint: use the intersect() function
+:::
+
+
+#### PCA
+
+As above we can calculate PCAs using our HVGs.
+```{r, eval=FALSE}
+seur_obj_filtered <- RunPCA(seur_obj_filtered, assay="SCT")
+DimPlot(seur_obj_filtered, reduction="pca")
+```
+
+
+```{r, eval=FALSE}
+sce_filtered <- runPCA(sce_filtered, exprs_values="logcounts", subset_row = hvgs_scran)
+plotPCA(sce_filtered, ncomponents=1:2)
+```
+
+### tSNE
+As mentioned in the lecture PCA preserves distances but rarely provides a good visualization of all of our data in only 2 components. Thus, we instead use non-linear methods such as tSNE and UMAP. However, both of these methods work best when starting from PCA space as compressing 20 principal components into 2 dimensions is much easier than compression 10,000 dimensional gene space into 2 dimensions.
+
+We should always set a value for the perplexity and random seed to ensure reproducibility of our plots.
+
+```{r, eval=FALSE}
+set.seed(101)
+seur_obj_filtered<-RunTSNE(seur_obj_filtered, dims=1:20, perplexity=50)
+DimPlot(seur_obj_filtered, reduction="tsne")
+```
+
+```{r, eval=FALSE}
+set.seed(101)
+sce_filtered <- scater::runTSNE(sce_filtered, perplexity=50, 
+    dimred="PCA", n_dimred=20)
+plotReducedDim(sce_filtered, dimred = "TSNE")
+```
+Notice how many more clusters are visible in these plots compared to PCA. How many cell-types do you think are in this dataset?
+
+:::Exercise 2
+What happens when you change the perplexity used by tSNE to 5, or 100? Do you still see the same number of clusters?
+:::
+
+####UMAP
+
+
+```{r, eval=FALSE}
+set.seed(101)
+seur_obj_filtered<-RunUMAP(seur_obj_filtered, dims=1:20)
+DimPlot(seur_obj_filtered, reduction="umap")
+```
+
+```{r, eval=FALSE}
+set.seed(101)
+sce_filtered <- scater::runUMAP(sce_filtered, dimred="PCA", n_dimred=20)
+plotReducedDim(sce_filtered, dimred = "UMAP")
+```
+UMAPs tend to plot datapoints into denser clusters and it tends to create "strings" coming off or linking up different clusters. Whereas tSNE tends to have evenly dense clusters, that are more circular in appearance. These are biases inherent in the algorithm themselves, and do not necessarily reflect the true structure of the data.
+
+Unlike tSNE people rarely report the parameters they use for UMAP as many algorithms pretend that UMAP doesn't have any parameters and rely on default values. In truth there are two key parameters for UMAP just like tSNE:
+* `n_neighbors` (scater)/`n.neighbors`(Seurat) - how many cells should each cell be connected to in order to approximate the structure of the data (default 15 in scater, 20 in Seurat)
+* `ncomponents`(scater)/`n.components`(Seurat) - number of principal components to use. (default 50 in scater, 10 in Seurat)
+
+
+:::Exercise 3
+What happens when you change the number of dimensions used to 5 or 30?
+What happens when you change the number of neighbours to 5 or 50?
+:::
+
+
+:::note We can always check which visualizations we've already calculated (and what their names are) for our SCE and Seurat Objects like so:
+```{r, eval=FALSE}
+reducedDims(sce_filtered)
+```
+
+```{r, eval=FALSE}
+Seurat::Reductions(seur_obj_filtered)
+```
+:::
+
+Finally, let's save our work again
+```{r, eval=FALSE}
+saveRDS(seur_obj_filtered, "Liver_QC_Norm_DimReduc_Seurat.rds")
+```
+
+
+### Destiny & DiffusionMaps
+
+Diffusion maps is a visualization specifically designed for data that exists on one or more trajectories rather than distinct clusters. Thus we will use a dataset of human embryonic development to show this method. 
+
+We calculate diffusion maps using the destiny package which is part of the Bioconductor universe so runs on SingleCellExperiment objects so we'll have to convert our dataset to that format again. Note this package is quite old so it hasn't been optimized for modern large datasets so it will take a bit of time to run. 
+
+```{r, eval=FALSE}
+require(Seurat)
+require(SingleCellExperiment)
+require(destiny)
+traj_data <- readRDS("~/CourseData/Human_embryo.rds")
+traj_data@meta.data$cell_type <- factor(traj_data@meta.data$cell_type) # tidy up our cell_type labels
+traj_data_sce <- as.SingleCellExperiment(traj_data)
+```
+Now we can calculate our diffusion map, for speed and memory efficiency (and to reduce noise) it is usually better to run this on a PCA space rather than the raw gene expression values.
+```{r, eval=FALSE}
+dm <- DiffusionMap(traj_data_sce, n_pcs=20)
+```
+Now all we need to do is visualize the results to see what's going on.
+```{r, eval=FALSE}
+palette(palette.colors(13, palette="Alphabet")) # Set the colours to use
+plot(dm, col_by = "cell_type", pch=20) # 3D version
+```
+
+It can be hard to see what is happening in 3D so let's look at this in a few 2D plots instead.
+
+```{r, eval=FALSE}
+plot(dm, 1:2, col_by = "cell_type", pch=20)
+```
+
+### Overview
+
+:::highlight
+**KEY POINTS**
+- Single-cell data must be normalized to eliminate the effects of differences in library size.
+  - Current best-practice is to use Pearson Residuals via the M3Drop or scTransform/Seurat packages
+  
+- To reduce noise, we identify highly variable genes and perform PCA.
+
+- Finally we use UMAP or tSNE to visualize our data
+  - Interpreting these plots is not straight forwards so using multiple plots and multiple parameters is recommended.
+
+:::
+
+
+
