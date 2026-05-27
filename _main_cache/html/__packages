@@ -1,0 +1,16 @@
+readr
+jsonlite
+htmltools
+knitr
+Matrix
+matrixStats
+MatrixGenerics
+BiocGenerics
+S4Vectors
+IRanges
+GenomeInfoDb
+GenomicRanges
+Biobase
+SummarizedExperiment
+SingleCellExperiment
+DropletUtils

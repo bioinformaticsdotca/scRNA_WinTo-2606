@@ -4,18 +4,18 @@
 
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <title>Module 3 | Single Cell RNA-seq Analysis 2026</title>
+  <title>scRNA-seq Analysis: datastructures | Single Cell RNA-seq Analysis 2026</title>
   <meta name="description" content="Workshop website for the 2026 Single Cell RNA-seq Analysis Canadian Bioinformatics Workshop" />
   <meta name="generator" content="bookdown 0.46 and GitBook 2.6.7" />
 
-  <meta property="og:title" content="Module 3 | Single Cell RNA-seq Analysis 2026" />
+  <meta property="og:title" content="scRNA-seq Analysis: datastructures | Single Cell RNA-seq Analysis 2026" />
   <meta property="og:type" content="book" />
   <meta property="og:image" content="https://bioinformaticsdotca.github.io/scRNA_WinTo-2606/img/bioinformatics_logo.png" />
   <meta property="og:description" content="Workshop website for the 2026 Single Cell RNA-seq Analysis Canadian Bioinformatics Workshop" />
   <meta name="github-repo" content="bioinformaticsdotca/scRNA_WinTo-2606" />
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="Module 3 | Single Cell RNA-seq Analysis 2026" />
+  <meta name="twitter:title" content="scRNA-seq Analysis: datastructures | Single Cell RNA-seq Analysis 2026" />
   
   <meta name="twitter:description" content="Workshop website for the 2026 Single Cell RNA-seq Analysis Canadian Bioinformatics Workshop" />
   <meta name="twitter:image" content="https://bioinformaticsdotca.github.io/scRNA_WinTo-2606/img/bioinformatics_logo.png" />
@@ -29,8 +29,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black" />
   
   <link rel="shortcut icon" href="img/favicon.ico" type="image/x-icon" />
-<link rel="prev" href="module-2.html"/>
-<link rel="next" href="module-4.html"/>
+<link rel="prev" href="module-1.html"/>
+<link rel="next" href="example-data.html"/>
 <script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
@@ -179,12 +179,23 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </ul></li>
 <li class="chapter" data-level="" data-path="meet-your-faculty.html"><a href="meet-your-faculty.html"><i class="fa fa-check"></i>Meet Your Faculty</a></li>
 <li class="chapter" data-level="" data-path="data-and-compute-setup.html"><a href="data-and-compute-setup.html"><i class="fa fa-check"></i>Data and Compute Setup</a></li>
+<li class="part"><span><b>II Modules</b></span></li>
 <li class="chapter" data-level="" data-path="module-1.html"><a href="module-1.html"><i class="fa fa-check"></i>Module 1</a>
 <ul>
 <li class="chapter" data-level="" data-path="module-1.html"><a href="module-1.html#lecture"><i class="fa fa-check"></i>Lecture</a></li>
-<li class="chapter" data-level="" data-path="module-1.html"><a href="module-1.html#lab"><i class="fa fa-check"></i>Lab</a>
+<li class="chapter" data-level="" data-path="module-1.html"><a href="module-1.html#lab"><i class="fa fa-check"></i>Lab</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="scrna-seq-analysis-datastructures.html"><a href="scrna-seq-analysis-datastructures.html"><i class="fa fa-check"></i>scRNA-seq Analysis: datastructures</a>
 <ul>
-<li class="chapter" data-level="" data-path="module-1.html"><a href="module-1.html#scrna-seq-analysis-datastructures"><i class="fa fa-check"></i>scRNA-seq Analysis: datastructures</a></li>
+<li class="chapter" data-level="" data-path="example-data.html"><a href="example-data.html"><i class="fa fa-check"></i>The <code>Seurat</code> Object</a></li>
+<li class="chapter" data-level="" data-path="example-data.html"><a href="example-data.html#modifying-objects"><i class="fa fa-check"></i>Modifying Objects</a></li>
+<li class="chapter" data-level="" data-path="example-data.html"><a href="example-data.html#some-more-useful-functions"><i class="fa fa-check"></i>Some more useful functions</a>
+<ul>
+<li class="chapter" data-level="" data-path="example-data.html"><a href="example-data.html#subsetting-single-cell-objects"><i class="fa fa-check"></i>Subsetting Single Cell Objects</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="example-data.html"><a href="example-data.html#overview"><i class="fa fa-check"></i>Overview</a>
+<ul>
+<li class="chapter" data-level="" data-path="example-data.html"><a href="example-data.html#sessioninfo"><i class="fa fa-check"></i>sessionInfo()</a></li>
 </ul></li>
 </ul></li>
 <li class="chapter" data-level="" data-path="module-2.html"><a href="module-2.html"><i class="fa fa-check"></i>Module 2</a>
@@ -231,23 +242,140 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
           <div class="page-inner">
 
             <section class="normal" id="section-">
-<div id="module-3" class="section level1 hasAnchor">
-<h1>Module 3<a href="module-3.html#module-3" class="anchor-section" aria-label="Anchor link to header"></a></h1>
-<div id="lecture-2" class="section level2 hasAnchor">
-<h2>Lecture<a href="module-3.html#lecture-2" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-</div>
-<div id="lab-2" class="section level2 hasAnchor">
-<h2>Lab<a href="module-3.html#lab-2" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<div id="scrna-seq-analysis-datastructures" class="section level1 hasAnchor">
+<h1>scRNA-seq Analysis: datastructures<a href="scrna-seq-analysis-datastructures.html#scrna-seq-analysis-datastructures" class="anchor-section" aria-label="Anchor link to header"></a></h1>
+<pre><code>## Loading required package: Seurat</code></pre>
+<pre><code>## Warning in library(package, lib.loc = lib.loc, character.only = TRUE,
+## logical.return = TRUE, : there is no package called &#39;Seurat&#39;</code></pre>
+<pre><code>## Loading required package: DropletUtils</code></pre>
+<pre><code>## Loading required package: SingleCellExperiment</code></pre>
+<pre><code>## Loading required package: SummarizedExperiment</code></pre>
+<pre><code>## Loading required package: MatrixGenerics</code></pre>
+<pre><code>## Loading required package: matrixStats</code></pre>
+<pre><code>## 
+## Attaching package: &#39;MatrixGenerics&#39;</code></pre>
+<pre><code>## The following objects are masked from &#39;package:matrixStats&#39;:
+## 
+##     colAlls, colAnyNAs, colAnys, colAvgsPerRowSet, colCollapse,
+##     colCounts, colCummaxs, colCummins, colCumprods, colCumsums,
+##     colDiffs, colIQRDiffs, colIQRs, colLogSumExps, colMadDiffs,
+##     colMads, colMaxs, colMeans2, colMedians, colMins, colOrderStats,
+##     colProds, colQuantiles, colRanges, colRanks, colSdDiffs, colSds,
+##     colSums2, colTabulates, colVarDiffs, colVars, colWeightedMads,
+##     colWeightedMeans, colWeightedMedians, colWeightedSds,
+##     colWeightedVars, rowAlls, rowAnyNAs, rowAnys, rowAvgsPerColSet,
+##     rowCollapse, rowCounts, rowCummaxs, rowCummins, rowCumprods,
+##     rowCumsums, rowDiffs, rowIQRDiffs, rowIQRs, rowLogSumExps,
+##     rowMadDiffs, rowMads, rowMaxs, rowMeans2, rowMedians, rowMins,
+##     rowOrderStats, rowProds, rowQuantiles, rowRanges, rowRanks,
+##     rowSdDiffs, rowSds, rowSums2, rowTabulates, rowVarDiffs, rowVars,
+##     rowWeightedMads, rowWeightedMeans, rowWeightedMedians,
+##     rowWeightedSds, rowWeightedVars</code></pre>
+<pre><code>## Loading required package: GenomicRanges</code></pre>
+<pre><code>## Loading required package: stats4</code></pre>
+<pre><code>## Loading required package: BiocGenerics</code></pre>
+<pre><code>## 
+## Attaching package: &#39;BiocGenerics&#39;</code></pre>
+<pre><code>## The following objects are masked from &#39;package:stats&#39;:
+## 
+##     IQR, mad, sd, var, xtabs</code></pre>
+<pre><code>## The following objects are masked from &#39;package:base&#39;:
+## 
+##     anyDuplicated, aperm, append, as.data.frame, basename, cbind,
+##     colnames, dirname, do.call, duplicated, eval, evalq, Filter, Find,
+##     get, grep, grepl, intersect, is.unsorted, lapply, Map, mapply,
+##     match, mget, order, paste, pmax, pmax.int, pmin, pmin.int,
+##     Position, rank, rbind, Reduce, rownames, sapply, saveRDS, setdiff,
+##     table, tapply, union, unique, unsplit, which.max, which.min</code></pre>
+<pre><code>## Loading required package: S4Vectors</code></pre>
+<pre><code>## 
+## Attaching package: &#39;S4Vectors&#39;</code></pre>
+<pre><code>## The following object is masked from &#39;package:utils&#39;:
+## 
+##     findMatches</code></pre>
+<pre><code>## The following objects are masked from &#39;package:base&#39;:
+## 
+##     expand.grid, I, unname</code></pre>
+<pre><code>## Loading required package: IRanges</code></pre>
+<pre><code>## Loading required package: GenomeInfoDb</code></pre>
+<pre><code>## Loading required package: Biobase</code></pre>
+<pre><code>## Welcome to Bioconductor
+## 
+##     Vignettes contain introductory material; view with
+##     &#39;browseVignettes()&#39;. To cite Bioconductor, see
+##     &#39;citation(&quot;Biobase&quot;)&#39;, and for packages &#39;citation(&quot;pkgname&quot;)&#39;.</code></pre>
+<pre><code>## 
+## Attaching package: &#39;Biobase&#39;</code></pre>
+<pre><code>## The following object is masked from &#39;package:MatrixGenerics&#39;:
+## 
+##     rowMedians</code></pre>
+<pre><code>## The following objects are masked from &#39;package:matrixStats&#39;:
+## 
+##     anyMissing, rowMedians</code></pre>
+<pre><code>## Loading required package: Matrix</code></pre>
+<pre><code>## Warning: package &#39;Matrix&#39; was built under R version 4.4.3</code></pre>
+<pre><code>## 
+## Attaching package: &#39;Matrix&#39;</code></pre>
+<pre><code>## The following object is masked from &#39;package:S4Vectors&#39;:
+## 
+##     expand</code></pre>
+<div class="highlight">
+<div id="basic-r-datastructures" class="section level2 hasAnchor">
+<h2>Basic R Datastructures<a href="scrna-seq-analysis-datastructures.html#basic-r-datastructures" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>There are four basic data structures used in R:
+- vector : a 1D ordered set of 1 or more values that are all the same type
+- matrix : a 2D grid of values that are all the same type
+- data.frame : a 2D grid of values where each column can store data of a different type.
+- list : a 1D ordered set of 1 or more values where each value can be a different type.</p>
+<pre><code>x = c(1,-5,2,10,7) # vector of numbers
+x[2]
+y = c(&quot;canadian&quot;, &quot;bioinformatics&quot;, &quot;workshop&quot;, &quot;single&quot;, &quot;cell&quot;) # vector of strings
+y[1]</code></pre>
+<p>We can combine the vectors above into a matrix.</p>
+<pre><code>mat1 = cbind(x,x)
+mat1</code></pre>
+<p>However, if we try to mix data-types R will “coerce” them into the same type. In this case strings, as you can see from the quotation marks that are now around the numbers.</p>
+<pre><code>mat2 = rbind(x,y)
+mat2</code></pre>
+<p>To properly store numbers and text together we want a data.frame:</p>
+<pre><code>df = data.frame(num=x, text=y)
+df</code></pre>
+<p>If we want to store matrices, dataframes, and vectors together we can use a list:</p>
+<pre><code>lt = list(mat=mat2, vec=x, df=df)
+lt</code></pre>
+<p>To access data within these different objects we use square brackets with the “index” i.e. the item number or row+column number for the data we want to access. If our data is named we can also use the name to access it.</p>
+<pre><code># the &quot;vec&quot; in our list can be accessed in all of these ways
+lt[[2]] 
+lt[[&quot;vec&quot;]] 
+lt$vec
 
+# the column &quot;num&quot; in our dataframe can be accessed in all of these ways
+df$num 
+df[,&quot;num&quot;]
+df[,colnames(df) == &quot;num&quot;]
+</code></pre>
+<p><strong>R “Objects”</strong>
+Single-cell RNAseq data involves many different data structures for different parts of the data. Metadata is generally a dataframe. Gene expression is stored as a matrix. Lower dimensional projections are paired matrices, and cell-cell graphs require special datastructures.</p>
+<p>We could combine these together using a list but a list is so flexible when we give a list to a function it can be hard to find the right data in it. e.g. is the normalized data called “norm”, “lognorm”, “normdata”, “expr_mat” etc… To solve this problem we use “Objects” that act like a list but with pre-defined slots for specific types of data.</p>
+<p>You can tell when you are dealing with an object by the “@” symbol in the Global Environment or when using “str()” on the variable. This “@” indicated a pre-defined slot that must always exist in the object with a specific name and may to limited to storing a particular type of data. E.g. a “<a href="mailto:obj@counts" class="email">obj@counts</a>” slot likely must contain either a matrix or a sparse matrix.</p>
 </div>
+<div id="common-components-of-single-cell-data" class="section level2 hasAnchor">
+<h2>Common Components of Single-cell Data<a href="scrna-seq-analysis-datastructures.html#common-components-of-single-cell-data" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Single cell data &amp; analysis uses several distinct types of information, each of which can be stored in different ways:
+- genes x cells gene expression (numbers), this can be raw counts or after one or two levels of normalization / scaling
+- metadata about cells (numbers, text), this often involves various categorical classifications of cells, e.g. processing batch, patient ID, disease status, cell-type, but can also involve various quality control information.
+- lower dimension representation (numbers), this includes a cells x dimensions matrix for each representation, and may include a genes x dimensions matrix of weights.</p>
+<p><a href="https://www.nature.com/articles/s41592-019-0654-x/figures/2"><img src="https://www.nature.com/articles/s41592-019-0654-x/figures/2" alt="Overview of the SingleCellExperimentclass" /></a></p>
+<p>Different single-cell analysis packages use certain objects to organize these data, so functions can always find what they need.</p>
+<p>For more details on SingleCellObject, refer to: Amezquita, R.A., Lun, A.T.L., Becht, E. et al. Orchestrating single-cell analysis with Bioconductor. Nat Methods 17, 137–145 (2020). <a href="https://doi.org/10.1038/s41592-019-0654-x" class="uri">https://doi.org/10.1038/s41592-019-0654-x</a></p>
 </div>
             </section>
 
           </div>
         </div>
       </div>
-<a href="module-2.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
-<a href="module-4.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+<a href="module-1.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="example-data.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
     </div>
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>
@@ -278,7 +406,7 @@ gitbook.start({
     "size": 2
   },
   "edit": {
-    "link": "https://github.com/bioinformaticsdotca/scRNA_WinTo-2606/blob/main/030-module-3.Rmd",
+    "link": "https://github.com/bioinformaticsdotca/scRNA_WinTo-2606/blob/main/010-module-1.Rmd",
     "text": "Edit"
   },
   "history": {
