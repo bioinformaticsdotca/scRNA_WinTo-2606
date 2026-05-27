@@ -4,3 +4,307 @@
 
 
 ## Lab
+
+
+```{r, eval=FALSE}
+library(knitr)
+opts_chunk$set(cache = TRUE, out.width='100%', fig.align = 'center')
+```
+
+### Reading single-cell data
+
+#### cellranger output
+
+You should have downloaded a directory with raw output from cellranger for a sample of human liver single-cell RNAseq. This directory contains two folders and two files:
+
+* filtered_feature_bc_matrix : UMI count matrix in sparse format for droplets cell-ranger things have cells
+* raw_feature_bc_matrix : UMI count matrix in sparse format for all droplets
+* metrics_summary.csv : summary statistics in text form 
+* web_summary.html : summary statistics as a pretty html
+
+First let's open the **web_summary.html** and look inside.
+
+Cellranger actually outputs a lot of other stuff too, but these are what matter. 
+
+*Note: filtered_feature_bc_matrix.h5 is just the same data as the folder of the same name but saved into a different file format known as "hdf5" which has been optimized for Read/Write of large matrices.*
+
+If you look inside either of the folders you will see: 
+* barcodes.tsv.gz : full DNA sequence of the droplet barcode. (columns of the count matrix)
+* features.tsv.gz : one or more gene names for each gene. (rows of the count matrix)
+* matrix.mtx.gz : the count matrix in sparse data format, rows and columns are just numbers to save memory.
+
+Sparse matrices are used when data has a lot of zeros to save memory. They only store those entries in a matrix that are not 0. These are store as a triplet: (row, column, value). By loading the "Matrix" package we can load this matrix into R and work with it exactly as we would any other matrix. We will use Seurat's "Read10X" function to automatically add the row and column names for us from the appropriate text files.
+
+```{r,eval=FALSE} 
+raw_dat <- Seurat::Read10X(data.dir = "~/CourseData/Human_Liver/raw_feature_bc_matrix/")
+dim(raw_dat)
+```
+
+By using `dim()` we can see how big this matrix is, this is all the possible droplet barcodes. Lets look at some basic statistics:
+
+```{r,eval=FALSE}
+summary(Matrix::rowSums(raw_dat)) # total UMI per gene
+summary(Matrix::colSums(raw_dat)) # total UMI per droplet
+```
+If we wanted to identify viable cells ourselves, we would start with this matrix. However, most of the time we'll simply start from the cells identified by cellranger. So let's remove this massive matrix to free up our RAM and instead load the filtered data.
+
+```{r, eval=FALSE}
+rm(raw_dat)
+```
+
+We'll start with reading in our data as a Seurat Object.
+```{r, eval=FALSE}
+library(Seurat)
+seur_obj <- CreateSeuratObject(Read10X("~/CourseData/Human_Liver/filtered_feature_bc_matrix/"))
+```
+
+
+### QC with the `Seurat` package.
+
+We need to do another layer of quality checking and filtering to eliminate cells that are dead or damaged even after cellranger's filtering. Damaged cells typically have high mitochondrial reads, while dead cells have low total genes detected but often are still significantly different from empty droplets so aren't removed by cellranger's filtering.
+
+:::note
+If you use a different expression quantification method than cellranger (e.g. STARsolo, Alevin) then you may want to additionally consider the proportion of your UMI counts that derive from protein coding genes rather than pseudogenes or lncRNAs as high proportions of non-protein coding expression may be associated with high sequence error rates.
+:::
+  
+However, since different types of cells can have more or less RNA within them, more or less mitochondria inside them, and the depth of sequencing can vary between experiments, there is no universal threshold for how much is "enough" or how much is "too much".
+
+*Note: Single-nucleus RNAseq generally captures 10x less mitochondrial RNA than single-cell.*
+  
+  Instead, we look at the distribution of the appropriate metric and create our threshold based on that. Generally we assume the average normalized expression over a set of genes should be approximately normally distributed, as would the total number of genes detected per cell. Using this assumption we look for outliers / "heavy tails" and use the threshold to exclude them.
+
+### Mitochondrial Proportion
+One key QC metric is the proportion of mitochondrial genes in each cell. The problem with this metric is that there is no standard naming convention for mitochondrial genes across all organisms, so we have to tell the function which genes are mitochondrial.
+
+For Human data, the gene symbol of mitochondrial genes (i.e. genes on the mitochondrial genome) all start with "MT-", for mouse data mitochondiral genes start with "mt-".
+
+ We can use the `grepl` function to find out whether each gene name ("string") matches or doesn't match this pattern.
+
+```{r, eval=FALSE}
+is.mt <- grepl("^MT-", rownames(seur_obj))
+table(is.mt)
+```
+Here we can see that we've found 13 genes from the mitochondrial genome, as expected. Now let's calculate the QC metrics and add them to our Seurat object:
+
+```{r, eval=FALSE}
+seur_obj[["percent.mt"]] <- PercentageFeatureSet(seur_obj, "^MT-")
+```
+
+The `Seurat` package recommends to using Violin Plots to visualized quality control metrics. Violin plots combine a boxplot with a density distribution, and Seurat plots each datapoint as well to give the most complete information it can. However depending on the size of your dataset it can be difficult to make out the plot.
+```{r,eval=FALSE}
+VlnPlot(seur_obj, features = c("nFeature_RNA", "nCount_RNA", "percent.mt"), ncol = 3)
+```
+
+In general, these plots can be harder to use to to identify lower thresholds (like for nFeature and nCount) but work well for upper thresholds (percent.mt). It is debatable whether or not to exclude outliers with high total nCount/nFeature. These droplets are more likely to be doublets, but it is difficult to determine exactly which ones are or aren't.
+
+:::Exercise 1
+Using the plots above estimate what the appropriate upper/lower thresholds should be for each of the QC criteria.
+:::
+
+We could instead plot these metrics as histograms to get a better sense of how well they follow the expected distribution.
+
+```{r, eval=FALSE}
+hist(
+  seur_obj$nFeature_RNA,
+  breaks = 100
+)
+```
+We expect nFeature_RNA and nCount_RNA to follow an roughly normal distribution, so we want to cut off the excess cells near 0, and may want to trim off the upper "heavy" tail. We can choose out thresholds then add them to the plot like so:
+
+```{r, eval=FALSE}
+min_genes <- 500
+hist(
+  seur_obj$nFeature_RNA,
+  breaks = 100
+)
+abline(v = min_genes, col = "red")
+```
+If you have multiple samples in a single project, ideally you would find QC thresholds that work for all samples to ensure your samples are as similar to each other as possible. But always evaluate your choices on each sample separately rather than entire dataset as a whole.
+
+:::Exercise 2
+Using a histogram of each of the three metrics, determine what the upper/lower thresholds should be.
+:::
+
+Another good option is to use scatter plots showing the relationship between these metrics. This can be helpful to understand how our thresholds are related to each other.
+
+```{r, eval=FALSE}
+require(ggplot2)
+plot1 <- FeatureScatter(seur_obj, feature1 = "nCount_RNA", feature2 = "percent.mt") + theme(legend.position = "none")
+plot2 <- FeatureScatter(seur_obj, feature1 = "nCount_RNA", feature2 = "nFeature_RNA") + theme(legend.position = "none")
+plot1 + plot2 
+```
+Let's draw our thresholds on these plots as well, and colour the cells based on whether they pass our filters. Seurat makes all its plots with ggplot2 so we will need to use functions from that package to add the lines and recolour the plots.
+
+```{r, eval=FALSE}
+require(ggplot2)
+mt_threshold = 30
+
+seur_obj@meta.data$pass.filter <- seur_obj@meta.data$percent.mt < mt_threshold & seur_obj@meta.data$nFeature_RNA > min_genes
+
+plot_mt <- FeatureScatter(seur_obj, feature1 = "nCount_RNA", 
+                          feature2 = "percent.mt", 
+                          group.by="pass.filter")
+plot_mt <- plot_mt + theme(legend.position = "none") + geom_hline(yintercept=30) + ggtitle("")
+plot_nfeature <- FeatureScatter(seur_obj, feature1 = "nCount_RNA", 
+                                feature2 = "nFeature_RNA", 
+                                group.by="pass.filter")
+plot_nfeature <- plot_nfeature + geom_hline(yintercept = 500)+ggtitle("")
+plot_mt+plot_nfeature
+```
+
+Finally, we can subset our seurat object to apply our filters.
+```{r, eval=FALSE}
+seur_obj_filtered <- subset(seur_obj, subset = nFeature_RNA > min_genes & percent.mt < mt_threshold)
+```
+
+:::Exercise 3
+Reduce the threshold on mitochondrial RNA to 20%. How many additional cells does this remove? Is this a better threshold for this dataset?
+:::
+
+Once we have filtered our cells, we should refilter our genes to remove genes that aren't expressed in any of the high quality cells.
+
+```{r, eval=FALSE}
+keep_genes <- rowSums(GetAssayData(seur_obj_filtered, layer="counts", assay="RNA")) > 25
+seur_obj_filtered <- seur_obj_filtered[keep_genes,]
+```
+
+Another advantage to storing all our data & results into a single R object, is that it is easy to save our work and come back to it later. While you can save your entire workspace in R to pick up again later that is inefficient as many temporary variables you've forgotten about, and packages you aren't using anymore will be saved along with your data. Thus, I recommend saving just your SingleCellExperiment or Seurat Objects when you finish a significant step of your analysis to comeback to if you need to rerun or change something later.
+
+```{r, eval=FALSE}
+saveRDS(seur_obj_filtered, "Liver_QC_Seurat.rds")
+```
+
+# Identifying Doublets (DoubletFinder)
+Now let's look for doublets! We'll be using a method called DoubletFinder. Note that because this method requires calculating the expected number of doublets it can be detrimental to filter out droplets with a large number of UMIs prior to performing doublet detection.
+
+```{r, eval=FALSE}
+require(DoubletFinder)
+```
+It is normally only possible to identify heterotypic doublets (doublets between cells of different cell-types), thus we need to estimate the number & frequency of our cell-types to determine how many doublets we expect to see. Normally we would be running this as part of a larger analysis of the data and be doing many steps that we will talk about tomorrow to figure this out correctly.
+
+However, since this simply for calling the threshold for what is / isn't considered a doublet we don't need to be super accurate, so we will just run the standard Seurat clustering pipeline with default parameters to get a quick estimate. We will go through these functions and how they work in detail tomorrow.
+
+```{r, eval=FALSE}
+set.seed(42)
+seur_obj_filtered <- Seurat::NormalizeData(seur_obj_filtered)
+seur_obj_filtered <- Seurat::FindVariableFeatures(seur_obj_filtered)
+seur_obj_filtered <- Seurat::ScaleData(seur_obj_filtered)
+seur_obj_filtered <- Seurat::RunPCA(seur_obj_filtered)
+seur_obj_filtered <- Seurat::FindNeighbors(seur_obj_filtered)
+seur_obj_filtered <- Seurat::FindClusters(seur_obj_filtered)
+```
+
+These steps have added the `seurat_clusters` column to the `meta.data` table within our Seurat object. We can look at this using the `head()` function and we can count the number of cells in each of our clusters using the `table()` function.
+
+```{r, eval=FALSE}
+head(seur_obj_filtered@meta.data)
+table(seur_obj_filtered@meta.data$seurat_clusters)
+```
+
+To classify our cells using DoubletFinder requires several steps which involve several parameters:
+
+1. Creating a number of artificial doublets (parameter: pN = number of doublets as a % of the original dataset size)
+
+2. Merge them with our original data in PCA space (parameter: PCs = number of PCs to used for this space)
+
+3. For each cell, calculate the proportion of artifical doublets (pANN) that are next to this cell (parameter: pK = % of the merged dataset that is considered a "next to" this cell)
+
+4. Determine the threshold for the pANN score that corresponds to our expected number of heterotypic doubelts (parameter: nEXP = expected number of heterotypic doublets)
+
+First let's calculate nEXP using our clusters and some reference information for the expected doublet rate. We can manually calculate the probability of a doublet being homotypic, by squaring the frequencies of our cell-types and adding them together. This is also provided as a function: `DoubletFinder::modelHomotypic()`
+
+```{r, eval=FALSE}
+type.freq <- table(seur_obj_filtered@meta.data$seurat_clusters)/ncol(seur_obj_filtered)
+homotypic.prop <- sum(type.freq^2)
+```
+
+The proportion of cells we expect to be heterotypic doublets is then the frequency of all doublets multiplied by `1-homotypic.prop`. The "typical" doublet rate for 10X is ~0.9% per 1,000 cells captured (this is a general rule of thumb based on experiments using mixtures of mouse and human cells. 
+
+```{r, eval=FALSE}
+nEXP = 0.009*(ncol(seur_obj)/1000)*(1-homotypic.prop)*ncol(seur_obj_filtered)
+nEXP
+```
+
+For `pN` this doesn't matter so much, we'll used the author recommendation of 25%. For `PCs` the danger is in underestimating the number of PCs rather than overestimating, as underestimating will lose resolution for one or more cell-types while over estimating just adds a little bit of noise. We expect ~1 PC per cell-type present in our tissue, we can again use our quick clustering above as a rough estimate of the number of cell-types present : 15. We'll add a few extra to be safe, and use 18 PCs.
+```{r, eval=FALSE}
+pN=0.25
+PCs=18
+```
+
+The tricky parameter to set is `pK` fortunately the authors have provided an inbuilt method to try out a bunch of values for it and identify the "best" one. "Best" in this case is measured by the "biomodality coefficient" which is a statistic that measures how much a distribution of values looks like it has two peaks rather than one. This assumes that pANN values should be bimodal with one peak corresponding to doublets and the other to single-cells.
+
+
+```{r, eval=FALSE}
+sweep.out <- paramSweep(seur_obj_filtered, PCs=1:PCs)
+sweep.stats <- summarizeSweep(sweep.out)
+plot(sweep.stats[,2:3])
+```
+
+Here we can see that low values of `pK` work better. We can now take a closer look just as those parameter combinations where we believe we'll get the best results. However, annoyingly the pK in our statistics is stored as a factor so to find those rows with a low pK we need to turn that factor back into a number:
+
+```{r, eval=FALSE}
+sweep.stats[as.numeric(as.character(sweep.stats[,2])) < 0.075 & sweep.stats[,3] > 0.7,]
+```
+Our best performance (max BCreal) occurs for pN=0.05, pK=0.005, but most of top performing scores are for higher values of pN. Since pN is the number of synthetic doublets, we probably want a relatively high number to ensure we get good representation of all the possible doublets in our dataset. pN = 0.2 and pK=0.05 or pK=0.06 both give good results so lets use one of those.
+
+```{r, eval=FALSE}
+pK=0.05
+pN=0.2
+seur_obj_filtered <- doubletFinder(seur_obj_filtered, PCs=1:PCs, pN=pN, pK=pK, nExp=nEXP)
+head(seur_obj@meta.data)
+```
+
+Now you can see that doubletFinder has added into our meta.data table the doublet scores and its classification. We can check how many cells in each of our clusters have been classified as doublets using `table()`
+
+```{r, eval=FALSE}
+table(seur_obj_filtered@meta.data$seurat_clusters, seur_obj_filtered@meta.data$DF.classifications_0.2_0.05_152.375416243733)
+```
+Here you can see that cluster 12 is enriched in doublets (>80%) so should probably be labelled as a doublet cluster. Cluster 9 also has a high proportion of doublets so maybe shouldn't be entirely trusted. 
+
+We can also visualize this using a UMAP (this will be covered tomorrow).
+
+```{r, eval=FALSE}
+seur_obj_filtered <- RunUMAP(seur_obj_filtered, dims=1:18)
+DimPlot(seur_obj_filtered, reduction="umap", group.by="DF.classifications_0.2_0.05_152.375416243733")
+```
+Or as a barplot:
+
+```{r, eval=FALSE}
+tab <- table(seur_obj_filtered@meta.data$seurat_clusters, seur_obj_filtered@meta.data$DF.classifications_0.2_0.05_152.375416243733)
+barplot(t(tab/rowSums(tab)), ylab="% of cells", xlab="Cluster")
+```
+
+In general, it is better to visualize per-cluster measures as a barplot rather than as a UMAP or tSNE because individual cells will be plotted on top of each other in the UMAP and the order of plotting determines which colour you actually see, which can result in misleading figures.
+
+:::Exercise 4
+Rerun DoubletFinger using pN=0.25 and pK=0.2. How does this change your results?
+1) Does the number of droplets identified at Doublets/Singlets change?
+2) What is the overlap between droplets assigned as Doublets between the two runs?
+3) What is the correlation between the pANN between the two runs? (Hint: the `cor()` function calculates correlations between two vectors.)
+:::
+
+::note
+***Bonus Exercise***
+
+Perform QC on the Mouse inner ear data. How different are the thresholds you used for this dataset to those you used for the Human Liver?
+```{r,eval=FALSE}
+mouse_seur <- CreateSeuratObject(Read10X("~/CourseData/Korrapati_MouseEar/filtered_feature_bc_matrix/"))
+```
+:::
+
+
+-------------------------------------------------------------------------------------------------------
+
+
+### Overview
+
+:::highlight
+**KEY POINTS**
+- QC aims to remove dead and damaged cells from our dataset
+- Number of genes detected per cell is a general estimate of data quality
+- % mitochrondrial RNA indicates damaged / apoptotic cells
+- Each dataset has a different distribution of values depending on the tissue identity and handling
+- thresholds for filtering must be set by hand for each dataset.
+:::
+
+

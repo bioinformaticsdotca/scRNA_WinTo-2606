@@ -30,7 +30,7 @@
   
   <link rel="shortcut icon" href="img/favicon.ico" type="image/x-icon" />
 <link rel="prev" href="module-1.html"/>
-<link rel="next" href="module-3.html"/>
+<link rel="next" href="identifying-doublets-doubletfinder.html"/>
 <script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
@@ -190,7 +190,16 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="" data-path="module-2.html"><a href="module-2.html"><i class="fa fa-check"></i>Module 2</a>
 <ul>
 <li class="chapter" data-level="" data-path="module-2.html"><a href="module-2.html#lecture-1"><i class="fa fa-check"></i>Lecture</a></li>
-<li class="chapter" data-level="" data-path="module-2.html"><a href="module-2.html#lab-1"><i class="fa fa-check"></i>Lab</a></li>
+<li class="chapter" data-level="" data-path="module-2.html"><a href="module-2.html#lab-1"><i class="fa fa-check"></i>Lab</a>
+<ul>
+<li class="chapter" data-level="" data-path="module-2.html"><a href="module-2.html#reading-single-cell-data"><i class="fa fa-check"></i>Reading single-cell data</a></li>
+<li class="chapter" data-level="" data-path="module-2.html"><a href="module-2.html#qc-with-the-seurat-package."><i class="fa fa-check"></i>QC with the <code>Seurat</code> package.</a></li>
+<li class="chapter" data-level="" data-path="module-2.html"><a href="module-2.html#mitochondrial-proportion"><i class="fa fa-check"></i>Mitochondrial Proportion</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="identifying-doublets-doubletfinder.html"><a href="identifying-doublets-doubletfinder.html"><i class="fa fa-check"></i>Identifying Doublets (DoubletFinder)</a>
+<ul>
+<li class="chapter" data-level="" data-path="identifying-doublets-doubletfinder.html"><a href="identifying-doublets-doubletfinder.html#overview-1"><i class="fa fa-check"></i>Overview</a></li>
 </ul></li>
 <li class="chapter" data-level="" data-path="module-3.html"><a href="module-3.html"><i class="fa fa-check"></i>Module 3</a>
 <ul>
@@ -217,7 +226,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="" data-path="module-5.html"><a href="module-5.html#differential-expression"><i class="fa fa-check"></i>Differential Expression</a></li>
 <li class="chapter" data-level="" data-path="module-5.html"><a href="module-5.html#pseudobulks"><i class="fa fa-check"></i>Pseudobulks</a></li>
 <li class="chapter" data-level="" data-path="module-5.html"><a href="module-5.html#edger"><i class="fa fa-check"></i>EdgeR</a></li>
-<li class="chapter" data-level="" data-path="module-5.html"><a href="module-5.html#overview-1"><i class="fa fa-check"></i>Overview</a></li>
+<li class="chapter" data-level="" data-path="module-5.html"><a href="module-5.html#overview-2"><i class="fa fa-check"></i>Overview</a></li>
 </ul></li>
 </ul></li>
 <li class="divider"></li>
@@ -256,7 +265,111 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </div>
 <div id="lab-1" class="section level2 hasAnchor">
 <h2>Lab<a href="module-2.html#lab-1" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-
+<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="module-2.html#cb23-1" tabindex="-1"></a><span class="fu">library</span>(knitr)</span>
+<span id="cb23-2"><a href="module-2.html#cb23-2" tabindex="-1"></a>opts_chunk<span class="sc">$</span><span class="fu">set</span>(<span class="at">cache =</span> <span class="cn">TRUE</span>, <span class="at">out.width=</span><span class="st">&#39;100%&#39;</span>, <span class="at">fig.align =</span> <span class="st">&#39;center&#39;</span>)</span></code></pre></div>
+<div id="reading-single-cell-data" class="section level3 hasAnchor">
+<h3>Reading single-cell data<a href="module-2.html#reading-single-cell-data" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<div id="cellranger-output" class="section level4 hasAnchor">
+<h4>cellranger output<a href="module-2.html#cellranger-output" class="anchor-section" aria-label="Anchor link to header"></a></h4>
+<p>You should have downloaded a directory with raw output from cellranger for a sample of human liver single-cell RNAseq. This directory contains two folders and two files:</p>
+<ul>
+<li>filtered_feature_bc_matrix : UMI count matrix in sparse format for droplets cell-ranger things have cells</li>
+<li>raw_feature_bc_matrix : UMI count matrix in sparse format for all droplets</li>
+<li>metrics_summary.csv : summary statistics in text form</li>
+<li>web_summary.html : summary statistics as a pretty html</li>
+</ul>
+<p>First let’s open the <strong>web_summary.html</strong> and look inside.</p>
+<p>Cellranger actually outputs a lot of other stuff too, but these are what matter.</p>
+<p><em>Note: filtered_feature_bc_matrix.h5 is just the same data as the folder of the same name but saved into a different file format known as “hdf5” which has been optimized for Read/Write of large matrices.</em></p>
+<p>If you look inside either of the folders you will see:
+* barcodes.tsv.gz : full DNA sequence of the droplet barcode. (columns of the count matrix)
+* features.tsv.gz : one or more gene names for each gene. (rows of the count matrix)
+* matrix.mtx.gz : the count matrix in sparse data format, rows and columns are just numbers to save memory.</p>
+<p>Sparse matrices are used when data has a lot of zeros to save memory. They only store those entries in a matrix that are not 0. These are store as a triplet: (row, column, value). By loading the “Matrix” package we can load this matrix into R and work with it exactly as we would any other matrix. We will use Seurat’s “Read10X” function to automatically add the row and column names for us from the appropriate text files.</p>
+<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="module-2.html#cb24-1" tabindex="-1"></a>raw_dat <span class="ot">&lt;-</span> Seurat<span class="sc">::</span><span class="fu">Read10X</span>(<span class="at">data.dir =</span> <span class="st">&quot;~/CourseData/Human_Liver/raw_feature_bc_matrix/&quot;</span>)</span>
+<span id="cb24-2"><a href="module-2.html#cb24-2" tabindex="-1"></a><span class="fu">dim</span>(raw_dat)</span></code></pre></div>
+<p>By using <code>dim()</code> we can see how big this matrix is, this is all the possible droplet barcodes. Lets look at some basic statistics:</p>
+<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="module-2.html#cb25-1" tabindex="-1"></a><span class="fu">summary</span>(Matrix<span class="sc">::</span><span class="fu">rowSums</span>(raw_dat)) <span class="co"># total UMI per gene</span></span>
+<span id="cb25-2"><a href="module-2.html#cb25-2" tabindex="-1"></a><span class="fu">summary</span>(Matrix<span class="sc">::</span><span class="fu">colSums</span>(raw_dat)) <span class="co"># total UMI per droplet</span></span></code></pre></div>
+<p>If we wanted to identify viable cells ourselves, we would start with this matrix. However, most of the time we’ll simply start from the cells identified by cellranger. So let’s remove this massive matrix to free up our RAM and instead load the filtered data.</p>
+<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="module-2.html#cb26-1" tabindex="-1"></a><span class="fu">rm</span>(raw_dat)</span></code></pre></div>
+<p>We’ll start with reading in our data as a Seurat Object.</p>
+<div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb27-1"><a href="module-2.html#cb27-1" tabindex="-1"></a><span class="fu">library</span>(Seurat)</span>
+<span id="cb27-2"><a href="module-2.html#cb27-2" tabindex="-1"></a>seur_obj <span class="ot">&lt;-</span> <span class="fu">CreateSeuratObject</span>(<span class="fu">Read10X</span>(<span class="st">&quot;~/CourseData/Human_Liver/filtered_feature_bc_matrix/&quot;</span>))</span></code></pre></div>
+</div>
+</div>
+<div id="qc-with-the-seurat-package." class="section level3 hasAnchor">
+<h3>QC with the <code>Seurat</code> package.<a href="module-2.html#qc-with-the-seurat-package." class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>We need to do another layer of quality checking and filtering to eliminate cells that are dead or damaged even after cellranger’s filtering. Damaged cells typically have high mitochondrial reads, while dead cells have low total genes detected but often are still significantly different from empty droplets so aren’t removed by cellranger’s filtering.</p>
+<div class="note">
+<p>If you use a different expression quantification method than cellranger (e.g. STARsolo, Alevin) then you may want to additionally consider the proportion of your UMI counts that derive from protein coding genes rather than pseudogenes or lncRNAs as high proportions of non-protein coding expression may be associated with high sequence error rates.</p>
+</div>
+<p>However, since different types of cells can have more or less RNA within them, more or less mitochondria inside them, and the depth of sequencing can vary between experiments, there is no universal threshold for how much is “enough” or how much is “too much”.</p>
+<p><em>Note: Single-nucleus RNAseq generally captures 10x less mitochondrial RNA than single-cell.</em></p>
+<p>Instead, we look at the distribution of the appropriate metric and create our threshold based on that. Generally we assume the average normalized expression over a set of genes should be approximately normally distributed, as would the total number of genes detected per cell. Using this assumption we look for outliers / “heavy tails” and use the threshold to exclude them.</p>
+</div>
+<div id="mitochondrial-proportion" class="section level3 hasAnchor">
+<h3>Mitochondrial Proportion<a href="module-2.html#mitochondrial-proportion" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>One key QC metric is the proportion of mitochondrial genes in each cell. The problem with this metric is that there is no standard naming convention for mitochondrial genes across all organisms, so we have to tell the function which genes are mitochondrial.</p>
+<p>For Human data, the gene symbol of mitochondrial genes (i.e. genes on the mitochondrial genome) all start with “MT-”, for mouse data mitochondiral genes start with “mt-”.</p>
+<p>We can use the <code>grepl</code> function to find out whether each gene name (“string”) matches or doesn’t match this pattern.</p>
+<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb28-1"><a href="module-2.html#cb28-1" tabindex="-1"></a>is.mt <span class="ot">&lt;-</span> <span class="fu">grepl</span>(<span class="st">&quot;^MT-&quot;</span>, <span class="fu">rownames</span>(seur_obj))</span>
+<span id="cb28-2"><a href="module-2.html#cb28-2" tabindex="-1"></a><span class="fu">table</span>(is.mt)</span></code></pre></div>
+<p>Here we can see that we’ve found 13 genes from the mitochondrial genome, as expected. Now let’s calculate the QC metrics and add them to our Seurat object:</p>
+<div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb29-1"><a href="module-2.html#cb29-1" tabindex="-1"></a>seur_obj[[<span class="st">&quot;percent.mt&quot;</span>]] <span class="ot">&lt;-</span> <span class="fu">PercentageFeatureSet</span>(seur_obj, <span class="st">&quot;^MT-&quot;</span>)</span></code></pre></div>
+<p>The <code>Seurat</code> package recommends to using Violin Plots to visualized quality control metrics. Violin plots combine a boxplot with a density distribution, and Seurat plots each datapoint as well to give the most complete information it can. However depending on the size of your dataset it can be difficult to make out the plot.</p>
+<div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb30-1"><a href="module-2.html#cb30-1" tabindex="-1"></a><span class="fu">VlnPlot</span>(seur_obj, <span class="at">features =</span> <span class="fu">c</span>(<span class="st">&quot;nFeature_RNA&quot;</span>, <span class="st">&quot;nCount_RNA&quot;</span>, <span class="st">&quot;percent.mt&quot;</span>), <span class="at">ncol =</span> <span class="dv">3</span>)</span></code></pre></div>
+<p>In general, these plots can be harder to use to to identify lower thresholds (like for nFeature and nCount) but work well for upper thresholds (percent.mt). It is debatable whether or not to exclude outliers with high total nCount/nFeature. These droplets are more likely to be doublets, but it is difficult to determine exactly which ones are or aren’t.</p>
+<p>:::Exercise 1
+Using the plots above estimate what the appropriate upper/lower thresholds should be for each of the QC criteria.
+:::</p>
+<p>We could instead plot these metrics as histograms to get a better sense of how well they follow the expected distribution.</p>
+<div class="sourceCode" id="cb31"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb31-1"><a href="module-2.html#cb31-1" tabindex="-1"></a><span class="fu">hist</span>(</span>
+<span id="cb31-2"><a href="module-2.html#cb31-2" tabindex="-1"></a>  seur_obj<span class="sc">$</span>nFeature_RNA,</span>
+<span id="cb31-3"><a href="module-2.html#cb31-3" tabindex="-1"></a>  <span class="at">breaks =</span> <span class="dv">100</span></span>
+<span id="cb31-4"><a href="module-2.html#cb31-4" tabindex="-1"></a>)</span></code></pre></div>
+<p>We expect nFeature_RNA and nCount_RNA to follow an roughly normal distribution, so we want to cut off the excess cells near 0, and may want to trim off the upper “heavy” tail. We can choose out thresholds then add them to the plot like so:</p>
+<div class="sourceCode" id="cb32"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb32-1"><a href="module-2.html#cb32-1" tabindex="-1"></a>min_genes <span class="ot">&lt;-</span> <span class="dv">500</span></span>
+<span id="cb32-2"><a href="module-2.html#cb32-2" tabindex="-1"></a><span class="fu">hist</span>(</span>
+<span id="cb32-3"><a href="module-2.html#cb32-3" tabindex="-1"></a>  seur_obj<span class="sc">$</span>nFeature_RNA,</span>
+<span id="cb32-4"><a href="module-2.html#cb32-4" tabindex="-1"></a>  <span class="at">breaks =</span> <span class="dv">100</span></span>
+<span id="cb32-5"><a href="module-2.html#cb32-5" tabindex="-1"></a>)</span>
+<span id="cb32-6"><a href="module-2.html#cb32-6" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">v =</span> min_genes, <span class="at">col =</span> <span class="st">&quot;red&quot;</span>)</span></code></pre></div>
+<p>If you have multiple samples in a single project, ideally you would find QC thresholds that work for all samples to ensure your samples are as similar to each other as possible. But always evaluate your choices on each sample separately rather than entire dataset as a whole.</p>
+<p>:::Exercise 2
+Using a histogram of each of the three metrics, determine what the upper/lower thresholds should be.
+:::</p>
+<p>Another good option is to use scatter plots showing the relationship between these metrics. This can be helpful to understand how our thresholds are related to each other.</p>
+<div class="sourceCode" id="cb33"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb33-1"><a href="module-2.html#cb33-1" tabindex="-1"></a><span class="fu">require</span>(ggplot2)</span>
+<span id="cb33-2"><a href="module-2.html#cb33-2" tabindex="-1"></a>plot1 <span class="ot">&lt;-</span> <span class="fu">FeatureScatter</span>(seur_obj, <span class="at">feature1 =</span> <span class="st">&quot;nCount_RNA&quot;</span>, <span class="at">feature2 =</span> <span class="st">&quot;percent.mt&quot;</span>) <span class="sc">+</span> <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&quot;none&quot;</span>)</span>
+<span id="cb33-3"><a href="module-2.html#cb33-3" tabindex="-1"></a>plot2 <span class="ot">&lt;-</span> <span class="fu">FeatureScatter</span>(seur_obj, <span class="at">feature1 =</span> <span class="st">&quot;nCount_RNA&quot;</span>, <span class="at">feature2 =</span> <span class="st">&quot;nFeature_RNA&quot;</span>) <span class="sc">+</span> <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&quot;none&quot;</span>)</span>
+<span id="cb33-4"><a href="module-2.html#cb33-4" tabindex="-1"></a>plot1 <span class="sc">+</span> plot2 </span></code></pre></div>
+<p>Let’s draw our thresholds on these plots as well, and colour the cells based on whether they pass our filters. Seurat makes all its plots with ggplot2 so we will need to use functions from that package to add the lines and recolour the plots.</p>
+<div class="sourceCode" id="cb34"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb34-1"><a href="module-2.html#cb34-1" tabindex="-1"></a><span class="fu">require</span>(ggplot2)</span>
+<span id="cb34-2"><a href="module-2.html#cb34-2" tabindex="-1"></a>mt_threshold <span class="ot">=</span> <span class="dv">30</span></span>
+<span id="cb34-3"><a href="module-2.html#cb34-3" tabindex="-1"></a></span>
+<span id="cb34-4"><a href="module-2.html#cb34-4" tabindex="-1"></a>seur_obj<span class="sc">@</span>meta.data<span class="sc">$</span>pass.filter <span class="ot">&lt;-</span> seur_obj<span class="sc">@</span>meta.data<span class="sc">$</span>percent.mt <span class="sc">&lt;</span> mt_threshold <span class="sc">&amp;</span> seur_obj<span class="sc">@</span>meta.data<span class="sc">$</span>nFeature_RNA <span class="sc">&gt;</span> min_genes</span>
+<span id="cb34-5"><a href="module-2.html#cb34-5" tabindex="-1"></a></span>
+<span id="cb34-6"><a href="module-2.html#cb34-6" tabindex="-1"></a>plot_mt <span class="ot">&lt;-</span> <span class="fu">FeatureScatter</span>(seur_obj, <span class="at">feature1 =</span> <span class="st">&quot;nCount_RNA&quot;</span>, </span>
+<span id="cb34-7"><a href="module-2.html#cb34-7" tabindex="-1"></a>                          <span class="at">feature2 =</span> <span class="st">&quot;percent.mt&quot;</span>, </span>
+<span id="cb34-8"><a href="module-2.html#cb34-8" tabindex="-1"></a>                          <span class="at">group.by=</span><span class="st">&quot;pass.filter&quot;</span>)</span>
+<span id="cb34-9"><a href="module-2.html#cb34-9" tabindex="-1"></a>plot_mt <span class="ot">&lt;-</span> plot_mt <span class="sc">+</span> <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">&quot;none&quot;</span>) <span class="sc">+</span> <span class="fu">geom_hline</span>(<span class="at">yintercept=</span><span class="dv">30</span>) <span class="sc">+</span> <span class="fu">ggtitle</span>(<span class="st">&quot;&quot;</span>)</span>
+<span id="cb34-10"><a href="module-2.html#cb34-10" tabindex="-1"></a>plot_nfeature <span class="ot">&lt;-</span> <span class="fu">FeatureScatter</span>(seur_obj, <span class="at">feature1 =</span> <span class="st">&quot;nCount_RNA&quot;</span>, </span>
+<span id="cb34-11"><a href="module-2.html#cb34-11" tabindex="-1"></a>                                <span class="at">feature2 =</span> <span class="st">&quot;nFeature_RNA&quot;</span>, </span>
+<span id="cb34-12"><a href="module-2.html#cb34-12" tabindex="-1"></a>                                <span class="at">group.by=</span><span class="st">&quot;pass.filter&quot;</span>)</span>
+<span id="cb34-13"><a href="module-2.html#cb34-13" tabindex="-1"></a>plot_nfeature <span class="ot">&lt;-</span> plot_nfeature <span class="sc">+</span> <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="dv">500</span>)<span class="sc">+</span><span class="fu">ggtitle</span>(<span class="st">&quot;&quot;</span>)</span>
+<span id="cb34-14"><a href="module-2.html#cb34-14" tabindex="-1"></a>plot_mt<span class="sc">+</span>plot_nfeature</span></code></pre></div>
+<p>Finally, we can subset our seurat object to apply our filters.</p>
+<div class="sourceCode" id="cb35"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb35-1"><a href="module-2.html#cb35-1" tabindex="-1"></a>seur_obj_filtered <span class="ot">&lt;-</span> <span class="fu">subset</span>(seur_obj, <span class="at">subset =</span> nFeature_RNA <span class="sc">&gt;</span> min_genes <span class="sc">&amp;</span> percent.mt <span class="sc">&lt;</span> mt_threshold)</span></code></pre></div>
+<p>:::Exercise 3
+Reduce the threshold on mitochondrial RNA to 20%. How many additional cells does this remove? Is this a better threshold for this dataset?
+:::</p>
+<p>Once we have filtered our cells, we should refilter our genes to remove genes that aren’t expressed in any of the high quality cells.</p>
+<div class="sourceCode" id="cb36"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb36-1"><a href="module-2.html#cb36-1" tabindex="-1"></a>keep_genes <span class="ot">&lt;-</span> <span class="fu">rowSums</span>(<span class="fu">GetAssayData</span>(seur_obj_filtered, <span class="at">layer=</span><span class="st">&quot;counts&quot;</span>, <span class="at">assay=</span><span class="st">&quot;RNA&quot;</span>)) <span class="sc">&gt;</span> <span class="dv">25</span></span>
+<span id="cb36-2"><a href="module-2.html#cb36-2" tabindex="-1"></a>seur_obj_filtered <span class="ot">&lt;-</span> seur_obj_filtered[keep_genes,]</span></code></pre></div>
+<p>Another advantage to storing all our data &amp; results into a single R object, is that it is easy to save our work and come back to it later. While you can save your entire workspace in R to pick up again later that is inefficient as many temporary variables you’ve forgotten about, and packages you aren’t using anymore will be saved along with your data. Thus, I recommend saving just your SingleCellExperiment or Seurat Objects when you finish a significant step of your analysis to comeback to if you need to rerun or change something later.</p>
+<div class="sourceCode" id="cb37"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb37-1"><a href="module-2.html#cb37-1" tabindex="-1"></a><span class="fu">saveRDS</span>(seur_obj_filtered, <span class="st">&quot;Liver_QC_Seurat.rds&quot;</span>)</span></code></pre></div>
+</div>
 </div>
 </div>
             </section>
@@ -265,7 +378,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
         </div>
       </div>
 <a href="module-1.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
-<a href="module-3.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+<a href="identifying-doublets-doubletfinder.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
     </div>
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>

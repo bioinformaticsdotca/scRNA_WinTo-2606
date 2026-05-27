@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+<head>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>Identifying Doublets (DoubletFinder) | Single Cell RNA-seq Analysis 2026</title>
+  <meta name="description" content="Workshop website for the 2026 Single Cell RNA-seq Analysis Canadian Bioinformatics Workshop" />
+  <meta name="generator" content="bookdown 0.46 and GitBook 2.6.7" />
+
+  <meta property="og:title" content="Identifying Doublets (DoubletFinder) | Single Cell RNA-seq Analysis 2026" />
+  <meta property="og:type" content="book" />
+  <meta property="og:image" content="https://bioinformaticsdotca.github.io/scRNA_WinTo-2606/img/bioinformatics_logo.png" />
+  <meta property="og:description" content="Workshop website for the 2026 Single Cell RNA-seq Analysis Canadian Bioinformatics Workshop" />
+  <meta name="github-repo" content="bioinformaticsdotca/scRNA_WinTo-2606" />
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Identifying Doublets (DoubletFinder) | Single Cell RNA-seq Analysis 2026" />
+  
+  <meta name="twitter:description" content="Workshop website for the 2026 Single Cell RNA-seq Analysis Canadian Bioinformatics Workshop" />
+  <meta name="twitter:image" content="https://bioinformaticsdotca.github.io/scRNA_WinTo-2606/img/bioinformatics_logo.png" />
+
+<meta name="author" content="Faculty: Tallulah Andrews, Chaitra Sarathy, Alyona Ivanova" />
+
+
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  
+  <link rel="shortcut icon" href="img/favicon.ico" type="image/x-icon" />
+<link rel="prev" href="module-2.html"/>
+<link rel="next" href="module-3.html"/>
+<script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-clipboard.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+<link href="libs/anchor-sections-1.1.0/anchor-sections.css" rel="stylesheet" />
+<link href="libs/anchor-sections-1.1.0/anchor-sections-hash.css" rel="stylesheet" />
+<script src="libs/anchor-sections-1.1.0/anchor-sections.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LearningResource",
+  "name": "Single Cell RNA-seq Analysis",
+  "description": "The complete set of tutorials, slides, and practical exercises for the Single Cell RNA-seq Analysis 2026 Canadian Bioinformatics Workshop, hosted on GitHub Pages.",
+  "url": "https://bioinformaticsdotca.github.io/scRNA_WinTo-2606",
+  "learningResourceType": ["tutorial", "slides", "exercise"],
+  "inLanguage": "en",
+  "license": "https://creativecommons.org/licenses/by/4.0/",
+  "provider": {
+    "@type": "Organization",
+    "name": "Bioinformatics.ca",
+    "url": "https://bioinformatics.ca"
+  },
+  "keywords": "",
+  "isPartOf": {
+    "@type": "Course",
+    "@id": "https://bioinformatics.ca/workshops-all/2026-single-cell-rna-seq-analysis-winnipeg-mb/"
+  }
+}
+</script>
+
+
+<style type="text/css">
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+<style type="text/css">
+  
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+</style>
+
+<link rel="stylesheet" href="style.css" type="text/css" />
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<a href="https://bioinformaticsdotca.github.io/">
+ <img src="img/bioinformatics_logo.png" width="90%" alt="bioinformatics.ca logo" style="display:block; margin-left:auto; margin-right:auto; margin-top:15px;">
+ </a>
+<li><center><strong><a href="./"><br>Single Cell RNA-seq Analysis<br><br></a></strong></center></li>
+<a href="./">
+ <img src="img/scrna-logo.png" width="70%" alt="Single Cell RNA-seq Analysis logo" style="display:block; margin-left:auto; margin-right:auto; ">
+ </a>
+<br>
+
+<li class="divider"></li>
+<li class="part"><span><b>I Introduction</b></span></li>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>Workshop Info</a>
+<ul>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html#pre-work"><i class="fa fa-check"></i>Pre-work</a></li>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html#class-photo"><i class="fa fa-check"></i>Class Photo</a></li>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html#schedule"><i class="fa fa-check"></i>Schedule</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="meet-your-faculty.html"><a href="meet-your-faculty.html"><i class="fa fa-check"></i>Meet Your Faculty</a></li>
+<li class="chapter" data-level="" data-path="data-and-compute-setup.html"><a href="data-and-compute-setup.html"><i class="fa fa-check"></i>Data and Compute Setup</a></li>
+<li class="chapter" data-level="" data-path="module-1.html"><a href="module-1.html"><i class="fa fa-check"></i>Module 1</a>
+<ul>
+<li class="chapter" data-level="" data-path="module-1.html"><a href="module-1.html#lecture"><i class="fa fa-check"></i>Lecture</a></li>
+<li class="chapter" data-level="" data-path="module-1.html"><a href="module-1.html#lab"><i class="fa fa-check"></i>Lab</a>
+<ul>
+<li class="chapter" data-level="" data-path="module-1.html"><a href="module-1.html#scrna-seq-analysis-datastructures"><i class="fa fa-check"></i>scRNA-seq Analysis: datastructures</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="module-2.html"><a href="module-2.html"><i class="fa fa-check"></i>Module 2</a>
+<ul>
+<li class="chapter" data-level="" data-path="module-2.html"><a href="module-2.html#lecture-1"><i class="fa fa-check"></i>Lecture</a></li>
+<li class="chapter" data-level="" data-path="module-2.html"><a href="module-2.html#lab-1"><i class="fa fa-check"></i>Lab</a>
+<ul>
+<li class="chapter" data-level="" data-path="module-2.html"><a href="module-2.html#reading-single-cell-data"><i class="fa fa-check"></i>Reading single-cell data</a></li>
+<li class="chapter" data-level="" data-path="module-2.html"><a href="module-2.html#qc-with-the-seurat-package."><i class="fa fa-check"></i>QC with the <code>Seurat</code> package.</a></li>
+<li class="chapter" data-level="" data-path="module-2.html"><a href="module-2.html#mitochondrial-proportion"><i class="fa fa-check"></i>Mitochondrial Proportion</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="identifying-doublets-doubletfinder.html"><a href="identifying-doublets-doubletfinder.html"><i class="fa fa-check"></i>Identifying Doublets (DoubletFinder)</a>
+<ul>
+<li class="chapter" data-level="" data-path="identifying-doublets-doubletfinder.html"><a href="identifying-doublets-doubletfinder.html#overview-1"><i class="fa fa-check"></i>Overview</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="module-3.html"><a href="module-3.html"><i class="fa fa-check"></i>Module 3</a>
+<ul>
+<li class="chapter" data-level="" data-path="module-3.html"><a href="module-3.html#lecture-2"><i class="fa fa-check"></i>Lecture</a></li>
+<li class="chapter" data-level="" data-path="module-3.html"><a href="module-3.html#lab-2"><i class="fa fa-check"></i>Lab</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="module-4.html"><a href="module-4.html"><i class="fa fa-check"></i>Module 4</a>
+<ul>
+<li class="chapter" data-level="" data-path="module-4.html"><a href="module-4.html#lecture-3"><i class="fa fa-check"></i>Lecture</a></li>
+<li class="chapter" data-level="" data-path="module-4.html"><a href="module-4.html#lab-3"><i class="fa fa-check"></i>Lab</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="module-5.html"><a href="module-5.html"><i class="fa fa-check"></i>Module 5</a>
+<ul>
+<li class="chapter" data-level="" data-path="module-5.html"><a href="module-5.html#lecture-4"><i class="fa fa-check"></i>Lecture</a></li>
+<li class="chapter" data-level="" data-path="module-5.html"><a href="module-5.html#lab-4"><i class="fa fa-check"></i>Lab</a>
+<ul>
+<li class="chapter" data-level="" data-path="module-5.html"><a href="module-5.html#preprocessing"><i class="fa fa-check"></i>Preprocessing</a></li>
+<li class="chapter" data-level="" data-path="module-5.html"><a href="module-5.html#clustering"><i class="fa fa-check"></i>Clustering</a></li>
+<li class="chapter" data-level="" data-path="module-5.html"><a href="module-5.html#cell-cell-graph"><i class="fa fa-check"></i>Cell-cell graph</a></li>
+<li class="chapter" data-level="" data-path="module-5.html"><a href="module-5.html#clustering-1"><i class="fa fa-check"></i>Clustering</a></li>
+<li class="chapter" data-level="" data-path="module-5.html"><a href="module-5.html#finding-optimal-clusters"><i class="fa fa-check"></i>Finding optimal clusters</a></li>
+<li class="chapter" data-level="" data-path="module-5.html"><a href="module-5.html#annotating-clusters"><i class="fa fa-check"></i>Annotating Clusters</a></li>
+<li class="chapter" data-level="" data-path="module-5.html"><a href="module-5.html#reference-based-annotation"><i class="fa fa-check"></i>Reference based annotation</a></li>
+<li class="chapter" data-level="" data-path="module-5.html"><a href="module-5.html#differential-expression"><i class="fa fa-check"></i>Differential Expression</a></li>
+<li class="chapter" data-level="" data-path="module-5.html"><a href="module-5.html#pseudobulks"><i class="fa fa-check"></i>Pseudobulks</a></li>
+<li class="chapter" data-level="" data-path="module-5.html"><a href="module-5.html#edger"><i class="fa fa-check"></i>EdgeR</a></li>
+<li class="chapter" data-level="" data-path="module-5.html"><a href="module-5.html#overview-2"><i class="fa fa-check"></i>Overview</a></li>
+</ul></li>
+</ul></li>
+<li class="divider"></li>
+<h1 id="sponsors">Sponsors</h1>
+<center>
+<a href="https://www.cihr-irsc.gc.ca"><img src="img/sponsors/cihr.png" width=90% style="padding-bottom: 20px" alt="Canadian Institutes of Health Research logo."></a>
+
+<a href="https://genomecanada.ca/"><img src="img/sponsors/genomecanada.png" height="55" style="display:inline-block;"  style="padding-bottom: 20px" alt="Genome Canada logo.">
+<a href="https://www.ontariogenomics.ca/"><img src="img/sponsors/ontariogenomics.png" height="55" style="display:inline-block;" style="padding-bottom: 20px;" alt="Ontario Genomics logo.">
+<br><br>
+<a href="https://oicr.on.ca/"><img src="img/sponsors/oicr.png" width=35% style="display:inline-block;" style="padding-bottom: 20px" alt="Ontario Institute for Cancer Research logo.">
+<a href="https://umanitoba.ca/"><img src="img/sponsors/umlogo.png" width=35% style="display:inline-block;" style="padding-bottom: 30px" alt="Ontario Institute for University of Manitoba.">
+<a href="https://uhn.ca/"><img src="img/sponsors/uhnlogo.png" width=35% style="display:inline-block;" style="padding-bottom: 20px" alt="Ontario Institute for University Health Network.">
+
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Single Cell RNA-seq Analysis 2026</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="identifying-doublets-doubletfinder" class="section level1 hasAnchor">
+<h1>Identifying Doublets (DoubletFinder)<a href="identifying-doublets-doubletfinder.html#identifying-doublets-doubletfinder" class="anchor-section" aria-label="Anchor link to header"></a></h1>
+<p>Now let’s look for doublets! We’ll be using a method called DoubletFinder. Note that because this method requires calculating the expected number of doublets it can be detrimental to filter out droplets with a large number of UMIs prior to performing doublet detection.</p>
+<div class="sourceCode" id="cb38"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb38-1"><a href="identifying-doublets-doubletfinder.html#cb38-1" tabindex="-1"></a><span class="fu">require</span>(DoubletFinder)</span></code></pre></div>
+<p>It is normally only possible to identify heterotypic doublets (doublets between cells of different cell-types), thus we need to estimate the number &amp; frequency of our cell-types to determine how many doublets we expect to see. Normally we would be running this as part of a larger analysis of the data and be doing many steps that we will talk about tomorrow to figure this out correctly.</p>
+<p>However, since this simply for calling the threshold for what is / isn’t considered a doublet we don’t need to be super accurate, so we will just run the standard Seurat clustering pipeline with default parameters to get a quick estimate. We will go through these functions and how they work in detail tomorrow.</p>
+<div class="sourceCode" id="cb39"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb39-1"><a href="identifying-doublets-doubletfinder.html#cb39-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">42</span>)</span>
+<span id="cb39-2"><a href="identifying-doublets-doubletfinder.html#cb39-2" tabindex="-1"></a>seur_obj_filtered <span class="ot">&lt;-</span> Seurat<span class="sc">::</span><span class="fu">NormalizeData</span>(seur_obj_filtered)</span>
+<span id="cb39-3"><a href="identifying-doublets-doubletfinder.html#cb39-3" tabindex="-1"></a>seur_obj_filtered <span class="ot">&lt;-</span> Seurat<span class="sc">::</span><span class="fu">FindVariableFeatures</span>(seur_obj_filtered)</span>
+<span id="cb39-4"><a href="identifying-doublets-doubletfinder.html#cb39-4" tabindex="-1"></a>seur_obj_filtered <span class="ot">&lt;-</span> Seurat<span class="sc">::</span><span class="fu">ScaleData</span>(seur_obj_filtered)</span>
+<span id="cb39-5"><a href="identifying-doublets-doubletfinder.html#cb39-5" tabindex="-1"></a>seur_obj_filtered <span class="ot">&lt;-</span> Seurat<span class="sc">::</span><span class="fu">RunPCA</span>(seur_obj_filtered)</span>
+<span id="cb39-6"><a href="identifying-doublets-doubletfinder.html#cb39-6" tabindex="-1"></a>seur_obj_filtered <span class="ot">&lt;-</span> Seurat<span class="sc">::</span><span class="fu">FindNeighbors</span>(seur_obj_filtered)</span>
+<span id="cb39-7"><a href="identifying-doublets-doubletfinder.html#cb39-7" tabindex="-1"></a>seur_obj_filtered <span class="ot">&lt;-</span> Seurat<span class="sc">::</span><span class="fu">FindClusters</span>(seur_obj_filtered)</span></code></pre></div>
+<p>These steps have added the <code>seurat_clusters</code> column to the <code>meta.data</code> table within our Seurat object. We can look at this using the <code>head()</code> function and we can count the number of cells in each of our clusters using the <code>table()</code> function.</p>
+<div class="sourceCode" id="cb40"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb40-1"><a href="identifying-doublets-doubletfinder.html#cb40-1" tabindex="-1"></a><span class="fu">head</span>(seur_obj_filtered<span class="sc">@</span>meta.data)</span>
+<span id="cb40-2"><a href="identifying-doublets-doubletfinder.html#cb40-2" tabindex="-1"></a><span class="fu">table</span>(seur_obj_filtered<span class="sc">@</span>meta.data<span class="sc">$</span>seurat_clusters)</span></code></pre></div>
+<p>To classify our cells using DoubletFinder requires several steps which involve several parameters:</p>
+<ol style="list-style-type: decimal">
+<li><p>Creating a number of artificial doublets (parameter: pN = number of doublets as a % of the original dataset size)</p></li>
+<li><p>Merge them with our original data in PCA space (parameter: PCs = number of PCs to used for this space)</p></li>
+<li><p>For each cell, calculate the proportion of artifical doublets (pANN) that are next to this cell (parameter: pK = % of the merged dataset that is considered a “next to” this cell)</p></li>
+<li><p>Determine the threshold for the pANN score that corresponds to our expected number of heterotypic doubelts (parameter: nEXP = expected number of heterotypic doublets)</p></li>
+</ol>
+<p>First let’s calculate nEXP using our clusters and some reference information for the expected doublet rate. We can manually calculate the probability of a doublet being homotypic, by squaring the frequencies of our cell-types and adding them together. This is also provided as a function: <code>DoubletFinder::modelHomotypic()</code></p>
+<div class="sourceCode" id="cb41"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb41-1"><a href="identifying-doublets-doubletfinder.html#cb41-1" tabindex="-1"></a>type.freq <span class="ot">&lt;-</span> <span class="fu">table</span>(seur_obj_filtered<span class="sc">@</span>meta.data<span class="sc">$</span>seurat_clusters)<span class="sc">/</span><span class="fu">ncol</span>(seur_obj_filtered)</span>
+<span id="cb41-2"><a href="identifying-doublets-doubletfinder.html#cb41-2" tabindex="-1"></a>homotypic.prop <span class="ot">&lt;-</span> <span class="fu">sum</span>(type.freq<span class="sc">^</span><span class="dv">2</span>)</span></code></pre></div>
+<p>The proportion of cells we expect to be heterotypic doublets is then the frequency of all doublets multiplied by <code>1-homotypic.prop</code>. The “typical” doublet rate for 10X is ~0.9% per 1,000 cells captured (this is a general rule of thumb based on experiments using mixtures of mouse and human cells.</p>
+<div class="sourceCode" id="cb42"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb42-1"><a href="identifying-doublets-doubletfinder.html#cb42-1" tabindex="-1"></a>nEXP <span class="ot">=</span> <span class="fl">0.009</span><span class="sc">*</span>(<span class="fu">ncol</span>(seur_obj)<span class="sc">/</span><span class="dv">1000</span>)<span class="sc">*</span>(<span class="dv">1</span><span class="sc">-</span>homotypic.prop)<span class="sc">*</span><span class="fu">ncol</span>(seur_obj_filtered)</span>
+<span id="cb42-2"><a href="identifying-doublets-doubletfinder.html#cb42-2" tabindex="-1"></a>nEXP</span></code></pre></div>
+<p>For <code>pN</code> this doesn’t matter so much, we’ll used the author recommendation of 25%. For <code>PCs</code> the danger is in underestimating the number of PCs rather than overestimating, as underestimating will lose resolution for one or more cell-types while over estimating just adds a little bit of noise. We expect ~1 PC per cell-type present in our tissue, we can again use our quick clustering above as a rough estimate of the number of cell-types present : 15. We’ll add a few extra to be safe, and use 18 PCs.</p>
+<div class="sourceCode" id="cb43"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb43-1"><a href="identifying-doublets-doubletfinder.html#cb43-1" tabindex="-1"></a>pN<span class="ot">=</span><span class="fl">0.25</span></span>
+<span id="cb43-2"><a href="identifying-doublets-doubletfinder.html#cb43-2" tabindex="-1"></a>PCs<span class="ot">=</span><span class="dv">18</span></span></code></pre></div>
+<p>The tricky parameter to set is <code>pK</code> fortunately the authors have provided an inbuilt method to try out a bunch of values for it and identify the “best” one. “Best” in this case is measured by the “biomodality coefficient” which is a statistic that measures how much a distribution of values looks like it has two peaks rather than one. This assumes that pANN values should be bimodal with one peak corresponding to doublets and the other to single-cells.</p>
+<div class="sourceCode" id="cb44"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb44-1"><a href="identifying-doublets-doubletfinder.html#cb44-1" tabindex="-1"></a>sweep.out <span class="ot">&lt;-</span> <span class="fu">paramSweep</span>(seur_obj_filtered, <span class="at">PCs=</span><span class="dv">1</span><span class="sc">:</span>PCs)</span>
+<span id="cb44-2"><a href="identifying-doublets-doubletfinder.html#cb44-2" tabindex="-1"></a>sweep.stats <span class="ot">&lt;-</span> <span class="fu">summarizeSweep</span>(sweep.out)</span>
+<span id="cb44-3"><a href="identifying-doublets-doubletfinder.html#cb44-3" tabindex="-1"></a><span class="fu">plot</span>(sweep.stats[,<span class="dv">2</span><span class="sc">:</span><span class="dv">3</span>])</span></code></pre></div>
+<p>Here we can see that low values of <code>pK</code> work better. We can now take a closer look just as those parameter combinations where we believe we’ll get the best results. However, annoyingly the pK in our statistics is stored as a factor so to find those rows with a low pK we need to turn that factor back into a number:</p>
+<div class="sourceCode" id="cb45"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb45-1"><a href="identifying-doublets-doubletfinder.html#cb45-1" tabindex="-1"></a>sweep.stats[<span class="fu">as.numeric</span>(<span class="fu">as.character</span>(sweep.stats[,<span class="dv">2</span>])) <span class="sc">&lt;</span> <span class="fl">0.075</span> <span class="sc">&amp;</span> sweep.stats[,<span class="dv">3</span>] <span class="sc">&gt;</span> <span class="fl">0.7</span>,]</span></code></pre></div>
+<p>Our best performance (max BCreal) occurs for pN=0.05, pK=0.005, but most of top performing scores are for higher values of pN. Since pN is the number of synthetic doublets, we probably want a relatively high number to ensure we get good representation of all the possible doublets in our dataset. pN = 0.2 and pK=0.05 or pK=0.06 both give good results so lets use one of those.</p>
+<div class="sourceCode" id="cb46"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb46-1"><a href="identifying-doublets-doubletfinder.html#cb46-1" tabindex="-1"></a>pK<span class="ot">=</span><span class="fl">0.05</span></span>
+<span id="cb46-2"><a href="identifying-doublets-doubletfinder.html#cb46-2" tabindex="-1"></a>pN<span class="ot">=</span><span class="fl">0.2</span></span>
+<span id="cb46-3"><a href="identifying-doublets-doubletfinder.html#cb46-3" tabindex="-1"></a>seur_obj_filtered <span class="ot">&lt;-</span> <span class="fu">doubletFinder</span>(seur_obj_filtered, <span class="at">PCs=</span><span class="dv">1</span><span class="sc">:</span>PCs, <span class="at">pN=</span>pN, <span class="at">pK=</span>pK, <span class="at">nExp=</span>nEXP)</span>
+<span id="cb46-4"><a href="identifying-doublets-doubletfinder.html#cb46-4" tabindex="-1"></a><span class="fu">head</span>(seur_obj<span class="sc">@</span>meta.data)</span></code></pre></div>
+<p>Now you can see that doubletFinder has added into our meta.data table the doublet scores and its classification. We can check how many cells in each of our clusters have been classified as doublets using <code>table()</code></p>
+<div class="sourceCode" id="cb47"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb47-1"><a href="identifying-doublets-doubletfinder.html#cb47-1" tabindex="-1"></a><span class="fu">table</span>(seur_obj_filtered<span class="sc">@</span>meta.data<span class="sc">$</span>seurat_clusters, seur_obj_filtered<span class="sc">@</span>meta.data<span class="sc">$</span>DF.classifications_0<span class="fl">.2</span>_0<span class="fl">.05</span>_152<span class="fl">.375416243733</span>)</span></code></pre></div>
+<p>Here you can see that cluster 12 is enriched in doublets (&gt;80%) so should probably be labelled as a doublet cluster. Cluster 9 also has a high proportion of doublets so maybe shouldn’t be entirely trusted.</p>
+<p>We can also visualize this using a UMAP (this will be covered tomorrow).</p>
+<div class="sourceCode" id="cb48"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb48-1"><a href="identifying-doublets-doubletfinder.html#cb48-1" tabindex="-1"></a>seur_obj_filtered <span class="ot">&lt;-</span> <span class="fu">RunUMAP</span>(seur_obj_filtered, <span class="at">dims=</span><span class="dv">1</span><span class="sc">:</span><span class="dv">18</span>)</span>
+<span id="cb48-2"><a href="identifying-doublets-doubletfinder.html#cb48-2" tabindex="-1"></a><span class="fu">DimPlot</span>(seur_obj_filtered, <span class="at">reduction=</span><span class="st">&quot;umap&quot;</span>, <span class="at">group.by=</span><span class="st">&quot;DF.classifications_0.2_0.05_152.375416243733&quot;</span>)</span></code></pre></div>
+<p>Or as a barplot:</p>
+<div class="sourceCode" id="cb49"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb49-1"><a href="identifying-doublets-doubletfinder.html#cb49-1" tabindex="-1"></a>tab <span class="ot">&lt;-</span> <span class="fu">table</span>(seur_obj_filtered<span class="sc">@</span>meta.data<span class="sc">$</span>seurat_clusters, seur_obj_filtered<span class="sc">@</span>meta.data<span class="sc">$</span>DF.classifications_0<span class="fl">.2</span>_0<span class="fl">.05</span>_152<span class="fl">.375416243733</span>)</span>
+<span id="cb49-2"><a href="identifying-doublets-doubletfinder.html#cb49-2" tabindex="-1"></a><span class="fu">barplot</span>(<span class="fu">t</span>(tab<span class="sc">/</span><span class="fu">rowSums</span>(tab)), <span class="at">ylab=</span><span class="st">&quot;% of cells&quot;</span>, <span class="at">xlab=</span><span class="st">&quot;Cluster&quot;</span>)</span></code></pre></div>
+<p>In general, it is better to visualize per-cluster measures as a barplot rather than as a UMAP or tSNE because individual cells will be plotted on top of each other in the UMAP and the order of plotting determines which colour you actually see, which can result in misleading figures.</p>
+<p>:::Exercise 4
+Rerun DoubletFinger using pN=0.25 and pK=0.2. How does this change your results?
+1) Does the number of droplets identified at Doublets/Singlets change?
+2) What is the overlap between droplets assigned as Doublets between the two runs?
+3) What is the correlation between the pANN between the two runs? (Hint: the <code>cor()</code> function calculates correlations between two vectors.)
+:::</p>
+<p>::note
+<strong><em>Bonus Exercise</em></strong></p>
+<p>Perform QC on the Mouse inner ear data. How different are the thresholds you used for this dataset to those you used for the Human Liver?</p>
+<div class="sourceCode" id="cb50"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb50-1"><a href="identifying-doublets-doubletfinder.html#cb50-1" tabindex="-1"></a>mouse_seur <span class="ot">&lt;-</span> <span class="fu">CreateSeuratObject</span>(<span class="fu">Read10X</span>(<span class="st">&quot;~/CourseData/Korrapati_MouseEar/filtered_feature_bc_matrix/&quot;</span>))</span></code></pre></div>
+<p>:::</p>
+<hr />
+<div id="overview-1" class="section level3 hasAnchor">
+<h3>Overview<a href="identifying-doublets-doubletfinder.html#overview-1" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<div class="highlight">
+<p><strong>KEY POINTS</strong>
+- QC aims to remove dead and damaged cells from our dataset
+- Number of genes detected per cell is a general estimate of data quality
+- % mitochrondrial RNA indicates damaged / apoptotic cells
+- Each dataset has a different distribution of values depending on the tissue identity and handling
+- thresholds for filtering must be set by hand for each dataset.</p>
+</div>
+
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="module-2.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="module-3.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/clipboard.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-clipboard.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+  "sharing": {
+    "github": false,
+    "facebook": false,
+    "twitter": false,
+    "linkedin": false,
+    "weibo": false,
+    "instapaper": false,
+    "vk": false,
+    "whatsapp": false,
+    "all": ["facebook", "twitter", "linkedin", "weibo", "instapaper"]
+  },
+  "fontsettings": {
+    "theme": "white",
+    "family": "sans",
+    "size": 2
+  },
+  "edit": {
+    "link": "https://github.com/bioinformaticsdotca/scRNA_WinTo-2606/blob/main/020-module-2.Rmd",
+    "text": "Edit"
+  },
+  "history": {
+    "link": null,
+    "text": null
+  },
+  "view": {
+    "link": null,
+    "text": null
+  },
+  "download": ["_main.pdf", "_main.epub"],
+  "search": {
+    "engine": "fuse",
+    "options": null
+  },
+  "toc": {
+    "collapse": "subsection"
+  }
+});
+});
+</script>
+
+</body>
+
+</html>
