@@ -1,0 +1,374 @@
+# Module 6
+
+## Lecture
+
+
+## Lab
+
+#### scRNA-seq Dataset Integration
+
+```{r, eval=FALSE}
+library(knitr)
+opts_chunk$set(cache = TRUE, out.width='100%', fig.align = 'center')
+```
+
+#### Introduction
+
+As more and more scRNA-seq datasets become available, carrying merged_seurat comparisons between them is key. There are two main approaches to comparing scRNASeq datasets. The first approach is "label-centric" which is focused on trying to identify equivalent cell-types/states across datasets by comparing individual cells or groups of cells. The other approach is "cross-dataset normalization" which attempts to computationally remove experiment-specific technical/biological effects so that data from multiple experiments can be combined and jointly analyzed.
+
+The label-centric approach can be used with dataset with high-confidence cell-annotations, e.g. the Human Cell Atlas (HCA) [@Regev2017-mw] or the Tabula Muris [@Quake2017] once they are completed, to project cells or clusters from a new sample onto this reference to consider tissue composition and/or identify cells with novel/unknown identity. Conceptually, such projections are similar to the popular BLAST method [@Altschul1990-ts], which makes it possible to quickly find the closest match in a database for a newly identified nucleotide or amino acid sequence. The label-centric approach can also be used to compare datasets of similar biological origin collected by different labs to ensure that the annotation and the analysis is consistent.
+
+The cross-dataset normalization approach can also be used to compare datasets of similar biological origin, unlike the label-centric approach it enables the join analysis of multiple datasets to facilitate the identification of rare cell-types which may to too sparsely sampled in each individual dataset to be reliably detected. However, cross-dataset normalization is not applicable to very large and diverse references since it assumes a significant portion of the biological variablility in each of the datasets overlaps with others.
+
+Let's load all the necessary libraries: 
+
+```
+library(Seurat) # CCA & RPCE integration
+library(SeuratDisk)
+library(SeuratWrappers)
+
+library(patchwork) # pretty plots
+library(harmony) # Harmony integration
+library(rliger) # LIGER integration
+library(reshape2) # convenient data manipulation
+library(RColorBrewer) # colour schemes
+library(dplyr)# convenient data manipulation
+library(cowplot) # pretty plots
+library(MultiPath) # optional for removing duplicate rows
+```
+
+#### Seurat v3, 3' vs 5' 10k PBMC
+
+Let's load the filtered Cell Ranger `h5` matrices downloaded from 10x Genomics data repository. These can also be downloaded using the commands below.
+
+```{r int7,eval=FALSE}
+#download.file("https://cf.10xgenomics.com/samples/cell-exp/4.0.0/Parent_NGSC3_DI_PBMC/Parent_NGSC3_DI_PBMC_filtered_feature_bc_matrix.h5",
+#              destfile = "3p_pbmc10k_filt.h5")
+#download.file("https://cf.10xgenomics.com/samples/cell-vdj/5.0.0/sc5p_v2_hs_PBMC_10k/sc5p_v2_hs_PBMC_10k_filtered_feature_bc_matrix.h5",
+#              destfile = "5p_pbmc10k_filt.h5")
+```
+
+Let's read the data and create the appropriate `Seurat` objects. Note that 5' dataset has other assays - namely, VDJ data.
+
+```{r, eval=FALSE}
+matrix_3p <- Read10X_h5("~/CourseData/3p_pbmc10k_filt.h5",use.names = T)
+matrix_5p <- Read10X_h5("~/CourseData/5p_pbmc10k_filt.h5",use.names = T)[['Gene Expression']]
+
+srat_3p   <- CreateSeuratObject(matrix_3p,project = "pbmc10k_3p")
+srat_5p   <- CreateSeuratObject(matrix_5p,project = "pbmc10k_5p")
+```
+
+Now let's remove matrices to save memory: 
+
+```{r, eval=FALSE}
+rm(matrix_3p)
+rm(matrix_5p)
+```
+
+Let's calculate the fractions of mitochondrial genes and ribosomal proteins, and do quick-and-dirty filtering of the datasets: 
+
+```{r, eval=FALSE}
+srat_3p[["percent.mt"]]  <- PercentageFeatureSet(srat_3p, pattern = "^MT-")
+srat_3p[["percent.rbp"]] <- PercentageFeatureSet(srat_3p, pattern = "^RP[SL]")
+srat_5p[["percent.mt"]]  <- PercentageFeatureSet(srat_5p, pattern = "^MT-")
+srat_5p[["percent.rbp"]] <- PercentageFeatureSet(srat_5p, pattern = "^RP[SL]")
+
+VlnPlot(srat_3p, features = c("nFeature_RNA","nCount_RNA","percent.mt","percent.rbp"), ncol = 4)
+VlnPlot(srat_5p, features = c("nFeature_RNA","nCount_RNA","percent.mt","percent.rbp"), ncol = 4)
+```
+Quick filtering of the datasets removes dying cells and putative doublets: 
+
+```{r, eval=FALSE}
+srat_3p <- subset(srat_3p, subset = nFeature_RNA > 500 & nFeature_RNA < 5000 & percent.mt < 15)
+srat_5p <- subset(srat_5p, subset = nFeature_RNA > 500 & nFeature_RNA < 5000 & percent.mt < 10)
+```
+
+Now, let's check if the genes in both datasets are the same? Turns out they are so we can proceed to Seurat's integration pipeline.
+
+```{r, eval=FALSE}
+identical(rownames(srat_3p), rownames(srat_5p)) 
+```
+
+Now, let's follow `Seurat` vignette for integration. To do this we need to make a simple R list of the two objects, and normalize/find HVG for each: 
+
+```{r, eval=FALSE}
+pbmc_list <- list()
+pbmc_list[["pbmc10k_3p"]] <- srat_3p
+pbmc_list[["pbmc10k_5p"]] <- srat_5p
+
+for (i in 1:length(pbmc_list)) {
+  pbmc_list[[i]] <- NormalizeData(pbmc_list[[i]], verbose = F)
+  pbmc_list[[i]] <- FindVariableFeatures(pbmc_list[[i]], selection.method = "vst", nfeatures = 2000, verbose = F)
+}
+```
+
+After this, we use the two following `Seurat` commands to find integration anchors and actually perform integration. This takes about 10 min: 
+
+```{r, eval=FALSE}
+pbmc_anchors    <- FindIntegrationAnchors(object.list = pbmc_list, dims = 1:30)
+pbmc_seurat     <- IntegrateData(anchorset = pbmc_anchors, dims = 1:30)
+```
+
+Let's remove all the datastructures we're not using to save the RAM:
+
+```{r, eval=FALSE}
+rm(pbmc_list)
+rm(pbmc_anchors)
+```
+
+Seurat integration creates a unified object that contains both original data ('RNA' `assay`) as well as integrated data ('integrated' `assay`). Let's set the assay to RNA and visualize the datasets before integration.
+
+```{r, eval=FALSE}
+DefaultAssay(pbmc_seurat) <- "RNA"
+```
+
+Let's do normalization, HVG finding, scaling, PCA, and UMAP on the un-integrated (RNA) assay:
+As of Seurat(v5) it automatically normalizes each datasets separately.
+
+```{r, eval=FALSE}
+pbmc_seurat <- NormalizeData(pbmc_seurat, verbose = F)
+pbmc_seurat <- FindVariableFeatures(pbmc_seurat, selection.method = "vst", nfeatures = 2000, verbose = F)
+pbmc_seurat <- ScaleData(pbmc_seurat, verbose = F)
+pbmc_seurat <- RunPCA(pbmc_seurat, npcs = 30, verbose = F)
+pbmc_seurat <- RunUMAP(pbmc_seurat, reduction = "pca", dims = 1:30, verbose = F)
+```
+
+UMAP plot of the datasets before integration shows clear separation. Note that we can use `patchwork` syntax with Seurat plotting functions:
+
+```{r, eval=FALSE}
+DimPlot(pbmc_seurat,reduction = "umap") + plot_annotation(title = "10k 3' PBMC and 10k 5' PBMC cells, before integration")
+```
+
+Now let's change the assay to integrated and do the same do the same thing in the integrated assay (it's already normalized and HVGs are selected):
+
+```{r, eval=FALSE}
+DefaultAssay(pbmc_seurat) <- "integrated"
+pbmc_seurat <- ScaleData(pbmc_seurat, verbose = F)
+pbmc_seurat <- RunPCA(pbmc_seurat, npcs = 30, verbose = F)
+pbmc_seurat <- RunUMAP(pbmc_seurat, reduction = "pca", dims = 1:30, verbose = F)
+```
+
+Finally, let's plot the integrated UMAP:
+
+```{r, eval=FALSE}
+DimPlot(pbmc_seurat, reduction = "umap") + plot_annotation(title = "10k 3' PBMC and 10k 5' PBMC cells, after integration (Seurat 3)")
+```
+
+The data are visibly very nicely integrated. Let's try a split plot, which should make the comparison easier:
+
+```{r, eval=FALSE}
+DimPlot(pbmc_seurat, reduction = "umap", split.by = "orig.ident") + NoLegend()
+```
+
+Now let's cluster the integrated matrix and look how clusters are distributed between the two sets: 
+
+```{r, eval=FALSE}
+pbmc_seurat <- FindNeighbors(pbmc_seurat, dims = 1:30, k.param = 10, verbose = F)
+pbmc_seurat <- FindClusters(pbmc_seurat, verbose = F)
+DimPlot(pbmc_seurat,label = T) + NoLegend()
+```
+
+We can now calculate the number of cells in each cluster that came for either 3' or the 5' dataset: 
+
+```{r, eval=FALSE}
+count_table <- table(pbmc_seurat@meta.data$seurat_clusters, pbmc_seurat@meta.data$orig.ident)
+count_table
+```
+
+
+To make plotting the distribution among clusters easier, we have created a custom function. (You will get a copy of this script when the course is over.) First, we need to load it by "sourcing" it: 
+
+```{r, eval=FALSE}
+source("~/CourseData/custom_seurat_functions.R")
+```
+
+
+Let's plot the distribution among clusters using our custom function:
+
+```{r, eval=FALSE}
+plot_integrated_clusters(pbmc_seurat) 
+```
+
+```{r, eval=FALSE}
+rm(pbmc_seurat)
+```
+
+### Harmony, 3' vs 5' 10k PBMC
+
+Using `harmony` is much faster than pretty much any other method, and was found to perform quite well in a recent benchmark. There also are convenient wrappers for interfacing with `Seurat`. Let's first merge the objects (without integration). Note the message about the matching cell barcodes:
+
+```{r, eval=FALSE}
+pbmc_harmony    <- merge(srat_3p,srat_5p)
+```
+
+Now let's do the same as we did before:
+!Note!: now we are normalizing the data across both datasets at the same time. For the 'NormalizedData' function this doesn't matter, but for other normalization methods (e.g. sctransform) this can make a big difference.
+
+```{r, eval=FALSE}
+pbmc_harmony <- NormalizeData(pbmc_harmony, verbose = F)
+pbmc_harmony <- FindVariableFeatures(pbmc_harmony, selection.method = "vst", nfeatures = 2000, verbose = F)
+pbmc_harmony <- ScaleData(pbmc_harmony, verbose = F)
+pbmc_harmony <- RunPCA(pbmc_harmony, npcs = 30, verbose = F)
+pbmc_harmony <- RunUMAP(pbmc_harmony, reduction = "pca", dims = 1:30, verbose = F)
+```
+
+Let's plot the "before" plot again:
+
+```{r, eval=FALSE}
+DimPlot(pbmc_harmony,reduction = "umap") + plot_annotation(title = "10k 3' PBMC and 10k 5' PBMC cells, before integration")
+```
+
+Use `RunHarmony` to run it on the combined `Seurat` object using `orig.ident` as batch: 
+
+```{r, eval=FALSE}
+pbmc_harmony <- RunHarmony(pbmc_harmony, "orig.ident", plot_convergence = T)
+```
+
+Check the generated embeddings:
+
+```{r, eval=FALSE}
+harmony_embeddings <- Embeddings(pbmc_harmony, 'harmony')
+harmony_embeddings[1:5, 1:5]
+```
+
+Check the PCA plot after: 
+
+```{r, eval=FALSE}
+p1 <- DimPlot(object = pbmc_harmony, reduction = "harmony", pt.size = .1, group.by = "orig.ident") + NoLegend()
+p2 <- VlnPlot(object = pbmc_harmony, features = "harmony_1", group.by = "orig.ident", pt.size = .1) + NoLegend()
+plot_grid(p1,p2)
+```
+
+Do UMAP and clustering: 
+
+```{r, eval=FALSE}
+pbmc_harmony <- RunUMAP(pbmc_harmony, reduction = "harmony", dims = 1:30, verbose = F)
+pbmc_harmony <- FindNeighbors(pbmc_harmony, reduction = "harmony", k.param = 10, dims = 1:30)
+pbmc_harmony <- FindClusters(pbmc_harmony)
+identity(pbmc_harmony)
+```
+
+Finally, so same UMAP plots of integrated datasets as above:
+
+```{r, eval=FALSE}
+pbmc_harmony <- SetIdent(pbmc_harmony,value = "orig.ident")
+DimPlot(pbmc_harmony,reduction = "umap") + plot_annotation(title = "10k 3' PBMC and 10k 5' PBMC cells, after integration (Harmony)")
+```
+
+```{r, eval=FALSE}
+DimPlot(pbmc_harmony, reduction = "umap", group.by = "orig.ident", pt.size = .1, split.by = 'orig.ident') + NoLegend()
+```
+
+These look a bit worse than ones from `Seurat`:
+
+```{r, eval=FALSE}
+pbmc_harmony <- SetIdent(pbmc_harmony,value = "seurat_clusters")
+DimPlot(pbmc_harmony,label = T) + NoLegend()
+```
+
+Finally, let's take a look at the cluster content: 
+
+```{r, eval=FALSE}
+plot_integrated_clusters(pbmc_harmony)
+```
+
+```{r, eval=FALSE}
+rm(pbmc_harmony)
+```
+
+Clusters and their content look pretty similar to what we obtained after `Seurat` integration. For a more detailed analysis, we would need cell type assignments. 
+
+### LIGER, 3' vs 5' 10k PBMC
+
+Similarly to other methods, we make a unified object and normalize/HVG/scale it. `LIGER` does not center data when scaling, hence the `do.center` option in `ScaleData`). The last two functions are wrappers that run `rliger` using `orig.ident` as a batch variable. 
+
+```{r, eval=FALSE}
+pbmc_liger    <- merge(srat_3p,srat_5p)
+pbmc_liger    <- normalize(pbmc_liger)
+pbmc_liger    <- selectGenes(pbmc_liger)
+pbmc_liger    <- scaleNotCenter(pbmc_liger)
+pbmc_liger    <- runIntegration(pbmc_liger, k=20)
+pbmc_liger    <- quantileNorm(pbmc_liger)
+```
+
+You can optionally perform Louvain clustering (`FindNeighbors` and `FindClusters`) after `RunQuantileNorm` - we'll do this as well to compare the results to the previous integration approaches. We use the same parameters (k = 10 for neighbors, default resolution for Louvain clustering).
+
+```{r, eval=FALSE}
+pbmc_liger    <- FindNeighbors(pbmc_liger,reduction = "inmfNorm",k.param = 10,dims = 1:20)
+pbmc_liger    <- FindClusters(pbmc_liger)
+```
+
+As previously, let's do dimensionality reduction and plotting:
+
+```{r, eval=FALSE}
+pbmc_liger    <- RunUMAP(pbmc_liger, dims = 1:ncol(pbmc_liger[["inmfNorm"]]), reduction = "inmfNorm", verbose = F)
+pbmc_liger    <- SetIdent(pbmc_liger,value = "orig.ident")
+DimPlot(pbmc_liger,reduction = "umap") + plot_annotation(title = "10k 3' PBMC and 10k 5' PBMC cells, after integration (LIGER)")
+DimPlot(pbmc_liger, reduction = "umap", group.by = "orig.ident", pt.size = .1, split.by = 'orig.ident') + NoLegend()
+```
+
+Clustering appears to be somewhat finer with the `LIGER`-integrated data:
+
+```{r, eval=FALSE}
+pbmc_liger <- SetIdent(pbmc_liger,value = "seurat_clusters")
+DimPlot(pbmc_liger,reduction = "umap",label = T)
+```
+
+The clusters look pretty different, and per-cluster distribution seems to confirm this (two clusters were deemed unique to 3' and 5' dataset, respectively):
+{r, eval=FALSE}{r int39,fig.align="center"}
+plot_integrated_clusters(pbmc_liger)
+```
+
+```{r, eval=FALSE}
+rm(pbmc_liger)
+rm(srat_3p)
+rm(srat_5p)
+```
+
+#### Exercise: Repeat the normalizations above using 3' 10k PMBCs and whole blood STRT-Seq
+
+Although we already have all the necessary files in our `/data` folder, we can download the necessary files from GEO database: 
+
+```{r, eval=FALSE}
+#download.file("https://ftp.ncbi.nlm.nih.gov/geo/series/GSE149nnn/GSE149938/suppl/GSE149938_umi_matrix.csv.gz",
+#              destfile = "GSE149938_umi_matrix.csv.gz")
+#download.file("https://cf.10xgenomics.com/samples/cell-exp/4.0.0/Parent_NGSC3_DI_PBMC/Parent_NGSC3_DI_PBMC_filtered_feature_bc_matrix.h5",
+#              destfile = "3p_pbmc10k_filt.h5")
+```
+
+```{r, eval=FALSE}
+require(Matrix)
+umi_gz <- gzfile("~/CourseData/GSE149938_umi_matrix.csv.gz",'rt')  
+umi <- t(read.csv(umi_gz,check.names = F,quote = ""))
+matrix_3p    <- Read10X_h5("~/CourseData/3p_pbmc10k_filt.h5",use.names = T)
+```
+We have a small problem, in that some genes are duplicated in our umi matrix. We can simply remove these genes, as they are few in number. 
+```{r, eval=FALSE}
+sum(duplicated(rownames(umi)))
+umi <- umi[!duplicated(rownames(umi)),]
+```
+If you want options for how to deal with duplicate gene names, Dr. Andrews' MultiPath package has a function to do that:
+
+```{r, eval=FALSE}
+?remove_duplicate_rows
+```
+
+Next, let's make `Seurat` objects and re-define some of the metadata columns (GEO dataset simply puts the cell type into the `orig.ident` slot, which will interfere with what we want to do next):
+
+```{r, eval=FALSE}
+srat_wb <- CreateSeuratObject(umi,project = "whole_blood")
+srat_3p <- CreateSeuratObject(matrix_3p,project = "pbmc10k_3p")
+rm(umi_gz)
+rm(umi)
+rm(matrix_3p)
+```
+
+```{r, eval=FALSE}
+colnames(srat_wb@meta.data)[1] <- "cell_type"
+srat_wb@meta.data$orig.ident <- "whole_blood"
+srat_wb@meta.data$orig.ident <- as.factor(srat_wb@meta.data$orig.ident)
+head(srat_wb[[]])
+```
+Ok now it is your turn. Perform QC, merging and data integration for these two datasets. Which integration methods work for these datasets?
+
+

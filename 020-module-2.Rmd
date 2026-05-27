@@ -174,7 +174,7 @@ Another advantage to storing all our data & results into a single R object, is t
 saveRDS(seur_obj_filtered, "Liver_QC_Seurat.rds")
 ```
 
-# Identifying Doublets (DoubletFinder)
+### Identifying Doublets (DoubletFinder)
 Now let's look for doublets! We'll be using a method called DoubletFinder. Note that because this method requires calculating the expected number of doublets it can be detrimental to filter out droplets with a large number of UMIs prior to performing doublet detection.
 
 ```{r, eval=FALSE}
@@ -296,7 +296,7 @@ mouse_seur <- CreateSeuratObject(Read10X("~/CourseData/Korrapati_MouseEar/filter
 -------------------------------------------------------------------------------------------------------
 
 
-### Overview
+#### Overview
 
 :::highlight
 **KEY POINTS**

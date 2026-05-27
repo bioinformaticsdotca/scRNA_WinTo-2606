@@ -30,7 +30,7 @@
   
   <link rel="shortcut icon" href="img/favicon.ico" type="image/x-icon" />
 <link rel="prev" href="module-1.html"/>
-<link rel="next" href="identifying-doublets-doubletfinder.html"/>
+<link rel="next" href="module-3.html"/>
 <script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
@@ -195,11 +195,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="" data-path="module-2.html"><a href="module-2.html#reading-single-cell-data"><i class="fa fa-check"></i>Reading single-cell data</a></li>
 <li class="chapter" data-level="" data-path="module-2.html"><a href="module-2.html#qc-with-the-seurat-package."><i class="fa fa-check"></i>QC with the <code>Seurat</code> package.</a></li>
 <li class="chapter" data-level="" data-path="module-2.html"><a href="module-2.html#mitochondrial-proportion"><i class="fa fa-check"></i>Mitochondrial Proportion</a></li>
+<li class="chapter" data-level="" data-path="module-2.html"><a href="module-2.html#identifying-doublets-doubletfinder"><i class="fa fa-check"></i>Identifying Doublets (DoubletFinder)</a></li>
 </ul></li>
-</ul></li>
-<li class="chapter" data-level="" data-path="identifying-doublets-doubletfinder.html"><a href="identifying-doublets-doubletfinder.html"><i class="fa fa-check"></i>Identifying Doublets (DoubletFinder)</a>
-<ul>
-<li class="chapter" data-level="" data-path="identifying-doublets-doubletfinder.html"><a href="identifying-doublets-doubletfinder.html#overview-1"><i class="fa fa-check"></i>Overview</a></li>
 </ul></li>
 <li class="chapter" data-level="" data-path="module-3.html"><a href="module-3.html"><i class="fa fa-check"></i>Module 3</a>
 <ul>
@@ -227,6 +224,15 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="" data-path="module-5.html"><a href="module-5.html#pseudobulks"><i class="fa fa-check"></i>Pseudobulks</a></li>
 <li class="chapter" data-level="" data-path="module-5.html"><a href="module-5.html#edger"><i class="fa fa-check"></i>EdgeR</a></li>
 <li class="chapter" data-level="" data-path="module-5.html"><a href="module-5.html#overview-2"><i class="fa fa-check"></i>Overview</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="module-6.html"><a href="module-6.html"><i class="fa fa-check"></i>Module 6</a>
+<ul>
+<li class="chapter" data-level="" data-path="module-6.html"><a href="module-6.html#lecture-5"><i class="fa fa-check"></i>Lecture</a></li>
+<li class="chapter" data-level="" data-path="module-6.html"><a href="module-6.html#lab-5"><i class="fa fa-check"></i>Lab</a>
+<ul>
+<li class="chapter" data-level="" data-path="module-6.html"><a href="module-6.html#harmony-3-vs-5-10k-pbmc"><i class="fa fa-check"></i>Harmony, 3’ vs 5’ 10k PBMC</a></li>
+<li class="chapter" data-level="" data-path="module-6.html"><a href="module-6.html#liger-3-vs-5-10k-pbmc"><i class="fa fa-check"></i>LIGER, 3’ vs 5’ 10k PBMC</a></li>
 </ul></li>
 </ul></li>
 <li class="divider"></li>
@@ -370,6 +376,84 @@ Reduce the threshold on mitochondrial RNA to 20%. How many additional cells does
 <p>Another advantage to storing all our data &amp; results into a single R object, is that it is easy to save our work and come back to it later. While you can save your entire workspace in R to pick up again later that is inefficient as many temporary variables you’ve forgotten about, and packages you aren’t using anymore will be saved along with your data. Thus, I recommend saving just your SingleCellExperiment or Seurat Objects when you finish a significant step of your analysis to comeback to if you need to rerun or change something later.</p>
 <div class="sourceCode" id="cb37"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb37-1"><a href="module-2.html#cb37-1" tabindex="-1"></a><span class="fu">saveRDS</span>(seur_obj_filtered, <span class="st">&quot;Liver_QC_Seurat.rds&quot;</span>)</span></code></pre></div>
 </div>
+<div id="identifying-doublets-doubletfinder" class="section level3 hasAnchor">
+<h3>Identifying Doublets (DoubletFinder)<a href="module-2.html#identifying-doublets-doubletfinder" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>Now let’s look for doublets! We’ll be using a method called DoubletFinder. Note that because this method requires calculating the expected number of doublets it can be detrimental to filter out droplets with a large number of UMIs prior to performing doublet detection.</p>
+<div class="sourceCode" id="cb38"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb38-1"><a href="module-2.html#cb38-1" tabindex="-1"></a><span class="fu">require</span>(DoubletFinder)</span></code></pre></div>
+<p>It is normally only possible to identify heterotypic doublets (doublets between cells of different cell-types), thus we need to estimate the number &amp; frequency of our cell-types to determine how many doublets we expect to see. Normally we would be running this as part of a larger analysis of the data and be doing many steps that we will talk about tomorrow to figure this out correctly.</p>
+<p>However, since this simply for calling the threshold for what is / isn’t considered a doublet we don’t need to be super accurate, so we will just run the standard Seurat clustering pipeline with default parameters to get a quick estimate. We will go through these functions and how they work in detail tomorrow.</p>
+<div class="sourceCode" id="cb39"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb39-1"><a href="module-2.html#cb39-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">42</span>)</span>
+<span id="cb39-2"><a href="module-2.html#cb39-2" tabindex="-1"></a>seur_obj_filtered <span class="ot">&lt;-</span> Seurat<span class="sc">::</span><span class="fu">NormalizeData</span>(seur_obj_filtered)</span>
+<span id="cb39-3"><a href="module-2.html#cb39-3" tabindex="-1"></a>seur_obj_filtered <span class="ot">&lt;-</span> Seurat<span class="sc">::</span><span class="fu">FindVariableFeatures</span>(seur_obj_filtered)</span>
+<span id="cb39-4"><a href="module-2.html#cb39-4" tabindex="-1"></a>seur_obj_filtered <span class="ot">&lt;-</span> Seurat<span class="sc">::</span><span class="fu">ScaleData</span>(seur_obj_filtered)</span>
+<span id="cb39-5"><a href="module-2.html#cb39-5" tabindex="-1"></a>seur_obj_filtered <span class="ot">&lt;-</span> Seurat<span class="sc">::</span><span class="fu">RunPCA</span>(seur_obj_filtered)</span>
+<span id="cb39-6"><a href="module-2.html#cb39-6" tabindex="-1"></a>seur_obj_filtered <span class="ot">&lt;-</span> Seurat<span class="sc">::</span><span class="fu">FindNeighbors</span>(seur_obj_filtered)</span>
+<span id="cb39-7"><a href="module-2.html#cb39-7" tabindex="-1"></a>seur_obj_filtered <span class="ot">&lt;-</span> Seurat<span class="sc">::</span><span class="fu">FindClusters</span>(seur_obj_filtered)</span></code></pre></div>
+<p>These steps have added the <code>seurat_clusters</code> column to the <code>meta.data</code> table within our Seurat object. We can look at this using the <code>head()</code> function and we can count the number of cells in each of our clusters using the <code>table()</code> function.</p>
+<div class="sourceCode" id="cb40"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb40-1"><a href="module-2.html#cb40-1" tabindex="-1"></a><span class="fu">head</span>(seur_obj_filtered<span class="sc">@</span>meta.data)</span>
+<span id="cb40-2"><a href="module-2.html#cb40-2" tabindex="-1"></a><span class="fu">table</span>(seur_obj_filtered<span class="sc">@</span>meta.data<span class="sc">$</span>seurat_clusters)</span></code></pre></div>
+<p>To classify our cells using DoubletFinder requires several steps which involve several parameters:</p>
+<ol style="list-style-type: decimal">
+<li><p>Creating a number of artificial doublets (parameter: pN = number of doublets as a % of the original dataset size)</p></li>
+<li><p>Merge them with our original data in PCA space (parameter: PCs = number of PCs to used for this space)</p></li>
+<li><p>For each cell, calculate the proportion of artifical doublets (pANN) that are next to this cell (parameter: pK = % of the merged dataset that is considered a “next to” this cell)</p></li>
+<li><p>Determine the threshold for the pANN score that corresponds to our expected number of heterotypic doubelts (parameter: nEXP = expected number of heterotypic doublets)</p></li>
+</ol>
+<p>First let’s calculate nEXP using our clusters and some reference information for the expected doublet rate. We can manually calculate the probability of a doublet being homotypic, by squaring the frequencies of our cell-types and adding them together. This is also provided as a function: <code>DoubletFinder::modelHomotypic()</code></p>
+<div class="sourceCode" id="cb41"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb41-1"><a href="module-2.html#cb41-1" tabindex="-1"></a>type.freq <span class="ot">&lt;-</span> <span class="fu">table</span>(seur_obj_filtered<span class="sc">@</span>meta.data<span class="sc">$</span>seurat_clusters)<span class="sc">/</span><span class="fu">ncol</span>(seur_obj_filtered)</span>
+<span id="cb41-2"><a href="module-2.html#cb41-2" tabindex="-1"></a>homotypic.prop <span class="ot">&lt;-</span> <span class="fu">sum</span>(type.freq<span class="sc">^</span><span class="dv">2</span>)</span></code></pre></div>
+<p>The proportion of cells we expect to be heterotypic doublets is then the frequency of all doublets multiplied by <code>1-homotypic.prop</code>. The “typical” doublet rate for 10X is ~0.9% per 1,000 cells captured (this is a general rule of thumb based on experiments using mixtures of mouse and human cells.</p>
+<div class="sourceCode" id="cb42"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb42-1"><a href="module-2.html#cb42-1" tabindex="-1"></a>nEXP <span class="ot">=</span> <span class="fl">0.009</span><span class="sc">*</span>(<span class="fu">ncol</span>(seur_obj)<span class="sc">/</span><span class="dv">1000</span>)<span class="sc">*</span>(<span class="dv">1</span><span class="sc">-</span>homotypic.prop)<span class="sc">*</span><span class="fu">ncol</span>(seur_obj_filtered)</span>
+<span id="cb42-2"><a href="module-2.html#cb42-2" tabindex="-1"></a>nEXP</span></code></pre></div>
+<p>For <code>pN</code> this doesn’t matter so much, we’ll used the author recommendation of 25%. For <code>PCs</code> the danger is in underestimating the number of PCs rather than overestimating, as underestimating will lose resolution for one or more cell-types while over estimating just adds a little bit of noise. We expect ~1 PC per cell-type present in our tissue, we can again use our quick clustering above as a rough estimate of the number of cell-types present : 15. We’ll add a few extra to be safe, and use 18 PCs.</p>
+<div class="sourceCode" id="cb43"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb43-1"><a href="module-2.html#cb43-1" tabindex="-1"></a>pN<span class="ot">=</span><span class="fl">0.25</span></span>
+<span id="cb43-2"><a href="module-2.html#cb43-2" tabindex="-1"></a>PCs<span class="ot">=</span><span class="dv">18</span></span></code></pre></div>
+<p>The tricky parameter to set is <code>pK</code> fortunately the authors have provided an inbuilt method to try out a bunch of values for it and identify the “best” one. “Best” in this case is measured by the “biomodality coefficient” which is a statistic that measures how much a distribution of values looks like it has two peaks rather than one. This assumes that pANN values should be bimodal with one peak corresponding to doublets and the other to single-cells.</p>
+<div class="sourceCode" id="cb44"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb44-1"><a href="module-2.html#cb44-1" tabindex="-1"></a>sweep.out <span class="ot">&lt;-</span> <span class="fu">paramSweep</span>(seur_obj_filtered, <span class="at">PCs=</span><span class="dv">1</span><span class="sc">:</span>PCs)</span>
+<span id="cb44-2"><a href="module-2.html#cb44-2" tabindex="-1"></a>sweep.stats <span class="ot">&lt;-</span> <span class="fu">summarizeSweep</span>(sweep.out)</span>
+<span id="cb44-3"><a href="module-2.html#cb44-3" tabindex="-1"></a><span class="fu">plot</span>(sweep.stats[,<span class="dv">2</span><span class="sc">:</span><span class="dv">3</span>])</span></code></pre></div>
+<p>Here we can see that low values of <code>pK</code> work better. We can now take a closer look just as those parameter combinations where we believe we’ll get the best results. However, annoyingly the pK in our statistics is stored as a factor so to find those rows with a low pK we need to turn that factor back into a number:</p>
+<div class="sourceCode" id="cb45"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb45-1"><a href="module-2.html#cb45-1" tabindex="-1"></a>sweep.stats[<span class="fu">as.numeric</span>(<span class="fu">as.character</span>(sweep.stats[,<span class="dv">2</span>])) <span class="sc">&lt;</span> <span class="fl">0.075</span> <span class="sc">&amp;</span> sweep.stats[,<span class="dv">3</span>] <span class="sc">&gt;</span> <span class="fl">0.7</span>,]</span></code></pre></div>
+<p>Our best performance (max BCreal) occurs for pN=0.05, pK=0.005, but most of top performing scores are for higher values of pN. Since pN is the number of synthetic doublets, we probably want a relatively high number to ensure we get good representation of all the possible doublets in our dataset. pN = 0.2 and pK=0.05 or pK=0.06 both give good results so lets use one of those.</p>
+<div class="sourceCode" id="cb46"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb46-1"><a href="module-2.html#cb46-1" tabindex="-1"></a>pK<span class="ot">=</span><span class="fl">0.05</span></span>
+<span id="cb46-2"><a href="module-2.html#cb46-2" tabindex="-1"></a>pN<span class="ot">=</span><span class="fl">0.2</span></span>
+<span id="cb46-3"><a href="module-2.html#cb46-3" tabindex="-1"></a>seur_obj_filtered <span class="ot">&lt;-</span> <span class="fu">doubletFinder</span>(seur_obj_filtered, <span class="at">PCs=</span><span class="dv">1</span><span class="sc">:</span>PCs, <span class="at">pN=</span>pN, <span class="at">pK=</span>pK, <span class="at">nExp=</span>nEXP)</span>
+<span id="cb46-4"><a href="module-2.html#cb46-4" tabindex="-1"></a><span class="fu">head</span>(seur_obj<span class="sc">@</span>meta.data)</span></code></pre></div>
+<p>Now you can see that doubletFinder has added into our meta.data table the doublet scores and its classification. We can check how many cells in each of our clusters have been classified as doublets using <code>table()</code></p>
+<div class="sourceCode" id="cb47"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb47-1"><a href="module-2.html#cb47-1" tabindex="-1"></a><span class="fu">table</span>(seur_obj_filtered<span class="sc">@</span>meta.data<span class="sc">$</span>seurat_clusters, seur_obj_filtered<span class="sc">@</span>meta.data<span class="sc">$</span>DF.classifications_0<span class="fl">.2</span>_0<span class="fl">.05</span>_152<span class="fl">.375416243733</span>)</span></code></pre></div>
+<p>Here you can see that cluster 12 is enriched in doublets (&gt;80%) so should probably be labelled as a doublet cluster. Cluster 9 also has a high proportion of doublets so maybe shouldn’t be entirely trusted.</p>
+<p>We can also visualize this using a UMAP (this will be covered tomorrow).</p>
+<div class="sourceCode" id="cb48"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb48-1"><a href="module-2.html#cb48-1" tabindex="-1"></a>seur_obj_filtered <span class="ot">&lt;-</span> <span class="fu">RunUMAP</span>(seur_obj_filtered, <span class="at">dims=</span><span class="dv">1</span><span class="sc">:</span><span class="dv">18</span>)</span>
+<span id="cb48-2"><a href="module-2.html#cb48-2" tabindex="-1"></a><span class="fu">DimPlot</span>(seur_obj_filtered, <span class="at">reduction=</span><span class="st">&quot;umap&quot;</span>, <span class="at">group.by=</span><span class="st">&quot;DF.classifications_0.2_0.05_152.375416243733&quot;</span>)</span></code></pre></div>
+<p>Or as a barplot:</p>
+<div class="sourceCode" id="cb49"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb49-1"><a href="module-2.html#cb49-1" tabindex="-1"></a>tab <span class="ot">&lt;-</span> <span class="fu">table</span>(seur_obj_filtered<span class="sc">@</span>meta.data<span class="sc">$</span>seurat_clusters, seur_obj_filtered<span class="sc">@</span>meta.data<span class="sc">$</span>DF.classifications_0<span class="fl">.2</span>_0<span class="fl">.05</span>_152<span class="fl">.375416243733</span>)</span>
+<span id="cb49-2"><a href="module-2.html#cb49-2" tabindex="-1"></a><span class="fu">barplot</span>(<span class="fu">t</span>(tab<span class="sc">/</span><span class="fu">rowSums</span>(tab)), <span class="at">ylab=</span><span class="st">&quot;% of cells&quot;</span>, <span class="at">xlab=</span><span class="st">&quot;Cluster&quot;</span>)</span></code></pre></div>
+<p>In general, it is better to visualize per-cluster measures as a barplot rather than as a UMAP or tSNE because individual cells will be plotted on top of each other in the UMAP and the order of plotting determines which colour you actually see, which can result in misleading figures.</p>
+<p>:::Exercise 4
+Rerun DoubletFinger using pN=0.25 and pK=0.2. How does this change your results?
+1) Does the number of droplets identified at Doublets/Singlets change?
+2) What is the overlap between droplets assigned as Doublets between the two runs?
+3) What is the correlation between the pANN between the two runs? (Hint: the <code>cor()</code> function calculates correlations between two vectors.)
+:::</p>
+<div class="note">
+<p><strong><em>Bonus Exercise</em></strong></p>
+<p>Perform QC on the Mouse inner ear data. How different are the thresholds you used for this dataset to those you used for the Human Liver?</p>
+<div class="sourceCode" id="cb50"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb50-1"><a href="module-2.html#cb50-1" tabindex="-1"></a>mouse_seur <span class="ot">&lt;-</span> <span class="fu">CreateSeuratObject</span>(<span class="fu">Read10X</span>(<span class="st">&quot;~/CourseData/Korrapati_MouseEar/filtered_feature_bc_matrix/&quot;</span>))</span></code></pre></div>
+</div>
+<hr />
+<div id="overview-1" class="section level4 hasAnchor">
+<h4>Overview<a href="module-2.html#overview-1" class="anchor-section" aria-label="Anchor link to header"></a></h4>
+<div class="highlight">
+<p><strong>KEY POINTS</strong>
+- QC aims to remove dead and damaged cells from our dataset
+- Number of genes detected per cell is a general estimate of data quality
+- % mitochrondrial RNA indicates damaged / apoptotic cells
+- Each dataset has a different distribution of values depending on the tissue identity and handling
+- thresholds for filtering must be set by hand for each dataset.</p>
+</div>
+
+</div>
+</div>
 </div>
 </div>
             </section>
@@ -378,7 +462,7 @@ Reduce the threshold on mitochondrial RNA to 20%. How many additional cells does
         </div>
       </div>
 <a href="module-1.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
-<a href="identifying-doublets-doubletfinder.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+<a href="module-3.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
     </div>
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>

@@ -229,6 +229,15 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="" data-path="module-5.html"><a href="module-5.html#overview-2"><i class="fa fa-check"></i>Overview</a></li>
 </ul></li>
 </ul></li>
+<li class="chapter" data-level="" data-path="module-6.html"><a href="module-6.html"><i class="fa fa-check"></i>Module 6</a>
+<ul>
+<li class="chapter" data-level="" data-path="module-6.html"><a href="module-6.html#lecture-5"><i class="fa fa-check"></i>Lecture</a></li>
+<li class="chapter" data-level="" data-path="module-6.html"><a href="module-6.html#lab-5"><i class="fa fa-check"></i>Lab</a>
+<ul>
+<li class="chapter" data-level="" data-path="module-6.html"><a href="module-6.html#harmony-3-vs-5-10k-pbmc"><i class="fa fa-check"></i>Harmony, 3’ vs 5’ 10k PBMC</a></li>
+<li class="chapter" data-level="" data-path="module-6.html"><a href="module-6.html#liger-3-vs-5-10k-pbmc"><i class="fa fa-check"></i>LIGER, 3’ vs 5’ 10k PBMC</a></li>
+</ul></li>
+</ul></li>
 <li class="divider"></li>
 <h1 id="sponsors">Sponsors</h1>
 <center>
@@ -317,11 +326,11 @@ Rerun DoubletFinger using pN=0.25 and pK=0.2. How does this change your results?
 2) What is the overlap between droplets assigned as Doublets between the two runs?
 3) What is the correlation between the pANN between the two runs? (Hint: the <code>cor()</code> function calculates correlations between two vectors.)
 :::</p>
-<p>::note
-<strong><em>Bonus Exercise</em></strong></p>
+<div class="note">
+<p><strong><em>Bonus Exercise</em></strong></p>
 <p>Perform QC on the Mouse inner ear data. How different are the thresholds you used for this dataset to those you used for the Human Liver?</p>
 <div class="sourceCode" id="cb50"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb50-1"><a href="identifying-doublets-doubletfinder.html#cb50-1" tabindex="-1"></a>mouse_seur <span class="ot">&lt;-</span> <span class="fu">CreateSeuratObject</span>(<span class="fu">Read10X</span>(<span class="st">&quot;~/CourseData/Korrapati_MouseEar/filtered_feature_bc_matrix/&quot;</span>))</span></code></pre></div>
-<p>:::</p>
+</div>
 <hr />
 <div id="overview-1" class="section level3 hasAnchor">
 <h3>Overview<a href="identifying-doublets-doubletfinder.html#overview-1" class="anchor-section" aria-label="Anchor link to header"></a></h3>
