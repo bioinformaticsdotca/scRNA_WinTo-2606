@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+<head>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>Module 5 | Single Cell RNA-seq Analysis 2026</title>
+  <meta name="description" content="Workshop website for the 2026 Single Cell RNA-seq Analysis Canadian Bioinformatics Workshop" />
+  <meta name="generator" content="bookdown 0.46 and GitBook 2.6.7" />
+
+  <meta property="og:title" content="Module 5 | Single Cell RNA-seq Analysis 2026" />
+  <meta property="og:type" content="book" />
+  <meta property="og:image" content="https://bioinformaticsdotca.github.io/scRNA_WinTo-2606/img/bioinformatics_logo.png" />
+  <meta property="og:description" content="Workshop website for the 2026 Single Cell RNA-seq Analysis Canadian Bioinformatics Workshop" />
+  <meta name="github-repo" content="bioinformaticsdotca/scRNA_WinTo-2606" />
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Module 5 | Single Cell RNA-seq Analysis 2026" />
+  
+  <meta name="twitter:description" content="Workshop website for the 2026 Single Cell RNA-seq Analysis Canadian Bioinformatics Workshop" />
+  <meta name="twitter:image" content="https://bioinformaticsdotca.github.io/scRNA_WinTo-2606/img/bioinformatics_logo.png" />
+
+<meta name="author" content="Faculty: Tallulah Andrews, Chaitra Sarathy, Alyona Ivanova" />
+
+
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  
+  <link rel="shortcut icon" href="img/favicon.ico" type="image/x-icon" />
+<link rel="prev" href="module-4.html"/>
+
+<script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-clipboard.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+<link href="libs/anchor-sections-1.1.0/anchor-sections.css" rel="stylesheet" />
+<link href="libs/anchor-sections-1.1.0/anchor-sections-hash.css" rel="stylesheet" />
+<script src="libs/anchor-sections-1.1.0/anchor-sections.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LearningResource",
+  "name": "Single Cell RNA-seq Analysis",
+  "description": "The complete set of tutorials, slides, and practical exercises for the Single Cell RNA-seq Analysis 2026 Canadian Bioinformatics Workshop, hosted on GitHub Pages.",
+  "url": "https://bioinformaticsdotca.github.io/scRNA_WinTo-2606",
+  "learningResourceType": ["tutorial", "slides", "exercise"],
+  "inLanguage": "en",
+  "license": "https://creativecommons.org/licenses/by/4.0/",
+  "provider": {
+    "@type": "Organization",
+    "name": "Bioinformatics.ca",
+    "url": "https://bioinformatics.ca"
+  },
+  "keywords": "",
+  "isPartOf": {
+    "@type": "Course",
+    "@id": "https://bioinformatics.ca/workshops-all/2026-single-cell-rna-seq-analysis-winnipeg-mb/"
+  }
+}
+</script>
+
+
+<style type="text/css">
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+<style type="text/css">
+  
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+</style>
+
+<link rel="stylesheet" href="style.css" type="text/css" />
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<a href="https://bioinformaticsdotca.github.io/">
+ <img src="img/bioinformatics_logo.png" width="90%" alt="bioinformatics.ca logo" style="display:block; margin-left:auto; margin-right:auto; margin-top:15px;">
+ </a>
+<li><center><strong><a href="./"><br>Single Cell RNA-seq Analysis<br><br></a></strong></center></li>
+<a href="./">
+ <img src="img/scrna-logo.png" width="70%" alt="Single Cell RNA-seq Analysis logo" style="display:block; margin-left:auto; margin-right:auto; ">
+ </a>
+<br>
+
+<li class="divider"></li>
+<li class="part"><span><b>I Introduction</b></span></li>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>Workshop Info</a>
+<ul>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html#pre-work"><i class="fa fa-check"></i>Pre-work</a></li>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html#class-photo"><i class="fa fa-check"></i>Class Photo</a></li>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html#schedule"><i class="fa fa-check"></i>Schedule</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="meet-your-faculty.html"><a href="meet-your-faculty.html"><i class="fa fa-check"></i>Meet Your Faculty</a></li>
+<li class="chapter" data-level="" data-path="data-and-compute-setup.html"><a href="data-and-compute-setup.html"><i class="fa fa-check"></i>Data and Compute Setup</a></li>
+<li class="chapter" data-level="" data-path="module-1.html"><a href="module-1.html"><i class="fa fa-check"></i>Module 1</a>
+<ul>
+<li class="chapter" data-level="" data-path="module-1.html"><a href="module-1.html#lecture"><i class="fa fa-check"></i>Lecture</a></li>
+<li class="chapter" data-level="" data-path="module-1.html"><a href="module-1.html#lab"><i class="fa fa-check"></i>Lab</a>
+<ul>
+<li class="chapter" data-level="" data-path="module-1.html"><a href="module-1.html#scrna-seq-analysis-datastructures"><i class="fa fa-check"></i>scRNA-seq Analysis: datastructures</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="module-2.html"><a href="module-2.html"><i class="fa fa-check"></i>Module 2</a>
+<ul>
+<li class="chapter" data-level="" data-path="module-2.html"><a href="module-2.html#lecture-1"><i class="fa fa-check"></i>Lecture</a></li>
+<li class="chapter" data-level="" data-path="module-2.html"><a href="module-2.html#lab-1"><i class="fa fa-check"></i>Lab</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="module-3.html"><a href="module-3.html"><i class="fa fa-check"></i>Module 3</a>
+<ul>
+<li class="chapter" data-level="" data-path="module-3.html"><a href="module-3.html#lecture-2"><i class="fa fa-check"></i>Lecture</a></li>
+<li class="chapter" data-level="" data-path="module-3.html"><a href="module-3.html#lab-2"><i class="fa fa-check"></i>Lab</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="module-4.html"><a href="module-4.html"><i class="fa fa-check"></i>Module 4</a>
+<ul>
+<li class="chapter" data-level="" data-path="module-4.html"><a href="module-4.html#lecture-3"><i class="fa fa-check"></i>Lecture</a></li>
+<li class="chapter" data-level="" data-path="module-4.html"><a href="module-4.html#lab-3"><i class="fa fa-check"></i>Lab</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="module-5.html"><a href="module-5.html"><i class="fa fa-check"></i>Module 5</a>
+<ul>
+<li class="chapter" data-level="" data-path="module-5.html"><a href="module-5.html#lecture-4"><i class="fa fa-check"></i>Lecture</a></li>
+<li class="chapter" data-level="" data-path="module-5.html"><a href="module-5.html#lab-4"><i class="fa fa-check"></i>Lab</a>
+<ul>
+<li class="chapter" data-level="" data-path="module-5.html"><a href="module-5.html#preprocessing"><i class="fa fa-check"></i>Preprocessing</a></li>
+<li class="chapter" data-level="" data-path="module-5.html"><a href="module-5.html#clustering"><i class="fa fa-check"></i>Clustering</a></li>
+<li class="chapter" data-level="" data-path="module-5.html"><a href="module-5.html#cell-cell-graph"><i class="fa fa-check"></i>Cell-cell graph</a></li>
+<li class="chapter" data-level="" data-path="module-5.html"><a href="module-5.html#clustering-1"><i class="fa fa-check"></i>Clustering</a></li>
+<li class="chapter" data-level="" data-path="module-5.html"><a href="module-5.html#finding-optimal-clusters"><i class="fa fa-check"></i>Finding optimal clusters</a></li>
+<li class="chapter" data-level="" data-path="module-5.html"><a href="module-5.html#annotating-clusters"><i class="fa fa-check"></i>Annotating Clusters</a></li>
+<li class="chapter" data-level="" data-path="module-5.html"><a href="module-5.html#reference-based-annotation"><i class="fa fa-check"></i>Reference based annotation</a></li>
+<li class="chapter" data-level="" data-path="module-5.html"><a href="module-5.html#differential-expression"><i class="fa fa-check"></i>Differential Expression</a></li>
+<li class="chapter" data-level="" data-path="module-5.html"><a href="module-5.html#pseudobulks"><i class="fa fa-check"></i>Pseudobulks</a></li>
+<li class="chapter" data-level="" data-path="module-5.html"><a href="module-5.html#edger"><i class="fa fa-check"></i>EdgeR</a></li>
+<li class="chapter" data-level="" data-path="module-5.html"><a href="module-5.html#overview-1"><i class="fa fa-check"></i>Overview</a></li>
+</ul></li>
+</ul></li>
+<li class="divider"></li>
+<h1 id="sponsors">Sponsors</h1>
+<center>
+<a href="https://www.cihr-irsc.gc.ca"><img src="img/sponsors/cihr.png" width=90% style="padding-bottom: 20px" alt="Canadian Institutes of Health Research logo."></a>
+
+<a href="https://genomecanada.ca/"><img src="img/sponsors/genomecanada.png" height="55" style="display:inline-block;"  style="padding-bottom: 20px" alt="Genome Canada logo.">
+<a href="https://www.ontariogenomics.ca/"><img src="img/sponsors/ontariogenomics.png" height="55" style="display:inline-block;" style="padding-bottom: 20px;" alt="Ontario Genomics logo.">
+<br><br>
+<a href="https://oicr.on.ca/"><img src="img/sponsors/oicr.png" width=35% style="display:inline-block;" style="padding-bottom: 20px" alt="Ontario Institute for Cancer Research logo.">
+<a href="https://umanitoba.ca/"><img src="img/sponsors/umlogo.png" width=35% style="display:inline-block;" style="padding-bottom: 30px" alt="Ontario Institute for University of Manitoba.">
+<a href="https://uhn.ca/"><img src="img/sponsors/uhnlogo.png" width=35% style="display:inline-block;" style="padding-bottom: 20px" alt="Ontario Institute for University Health Network.">
+
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Single Cell RNA-seq Analysis 2026</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="module-5" class="section level1 hasAnchor">
+<h1>Module 5<a href="module-5.html#module-5" class="anchor-section" aria-label="Anchor link to header"></a></h1>
+<div id="lecture-4" class="section level2 hasAnchor">
+<h2>Lecture<a href="module-5.html#lecture-4" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+</div>
+<div id="lab-4" class="section level2 hasAnchor">
+<h2>Lab<a href="module-5.html#lab-4" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<div id="preprocessing" class="section level3 hasAnchor">
+<h3>Preprocessing<a href="module-5.html#preprocessing" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>Before we do any clustering, we need to perform QC, Normalization, and Dimensionality Reduction (HVGs + PCA). We already covered these steps for the Liver dataset, so we’ll simply load that object from when we saved it:</p>
+<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="module-5.html#cb23-1" tabindex="-1"></a>seur_obj <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="st">&quot;Liver_QC_Norm_DimReduc_Seurat.rds&quot;</span>)</span>
+<span id="cb23-2"><a href="module-5.html#cb23-2" tabindex="-1"></a><span class="fu">library</span>(Seurat)</span></code></pre></div>
+<p>Recall: to make our analysis reproducible we need to set the random seed.</p>
+<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="module-5.html#cb24-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">4242</span>)</span></code></pre></div>
+</div>
+<div id="clustering" class="section level3 hasAnchor">
+<h3>Clustering<a href="module-5.html#clustering" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>Once we’ve done those steps it’s time to cluster our data. The most common approach used for single-cell data is “Louvain” or “Leiden” clustering, which is used by Seurat and scanpy. These methods are just two different algorithms for optimizing the modularity score of clusters in a graph. Thus we first need to turn our single-cell data into a graph before we can use these algorithms.</p>
+</div>
+<div id="cell-cell-graph" class="section level3 hasAnchor">
+<h3>Cell-cell graph<a href="module-5.html#cell-cell-graph" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>To turn our data into a graph we will link together cells with weighted edges based on their number of shared nearest neighbours. To do this we need to choose a number of nearest neighbours to consider (k). By default Seurat uses k=20, which seems to work well on human and mouse data sets with ~2,000-10,000 cells.</p>
+<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="module-5.html#cb25-1" tabindex="-1"></a>seur_obj <span class="ot">&lt;-</span> <span class="fu">FindNeighbors</span>(seur_obj, <span class="at">k.param =</span> <span class="dv">20</span>)</span></code></pre></div>
+<p>The NN/SNN graph is stored within the Seurat object in the “graphs” slot.</p>
+<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="module-5.html#cb26-1" tabindex="-1"></a>seur_obj<span class="sc">@</span>graphs<span class="sc">$</span>SCT_snn[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>,<span class="dv">1</span><span class="sc">:</span><span class="dv">25</span>]</span></code></pre></div>
+<p>Here a “1” means that two cells have identical sets of neighbours, while 0.25 means that those two cells share 25% of their neighbours, and a “.” or “0” means those two cells share no neighbours. These are treated as “weights” for the edges in the graph.</p>
+<div class="note">
+<p><strong>Exercise 1</strong>
+1) Use <code>rowSums()</code> and <code>mean()</code> to find average across cells of the total weight between that cell and all other cells.</p>
+<ol start="2" style="list-style-type: decimal">
+<li>Change k.param to 40, how does this affect the average weight for each cell?</li>
+</ol>
+</div>
+<div class="note">
+<p>Seurat uses an approximation heuristic to calculate nearest neighbours in a faster &amp; more scalable way but does not have guaranteed accuracy thus it’s advisable to use k &gt;= 10. For small data sets (i.e. &lt; 750 cells) we recommend using other clustering methods such as SC3</p>
+</div>
+</div>
+<div id="clustering-1" class="section level3 hasAnchor">
+<h3>Clustering<a href="module-5.html#clustering-1" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>Now we can run the Louvain/Leiden clustering algorithm on our cell-cell graph. Note that this is a stochastic algorithm meaning each time it is run we can get a slightly different solution. By default Seurat runs 10 iterations of the algorithm and keeps the solution with the highest modularity which improves the stability of the solution. In addition, there is a crucial resolution parameter <code>resolution</code> which influences the size of the cluster the algorithm will find. By default resolution is set at 0.8.</p>
+<div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb27-1"><a href="module-5.html#cb27-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">4242</span>)</span>
+<span id="cb27-2"><a href="module-5.html#cb27-2" tabindex="-1"></a>seur_obj <span class="ot">&lt;-</span> <span class="fu">FindNeighbors</span>(seur_obj, <span class="at">k.param =</span> <span class="dv">20</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb28-1"><a href="module-5.html#cb28-1" tabindex="-1"></a>seur_obj<span class="ot">&lt;-</span><span class="fu">FindClusters</span>(seur_obj, <span class="at">resolution=</span><span class="fl">0.8</span>)</span>
+<span id="cb28-2"><a href="module-5.html#cb28-2" tabindex="-1"></a><span class="fu">DimPlot</span>(seur_obj, <span class="at">label=</span><span class="cn">TRUE</span>)</span></code></pre></div>
+<p>Here you can see that by default when we plot out data using <code>DimPlot</code> Seurat plots a UMAP coloured by the most recent set of clusters you have generated. Here we set <code>label=TRUE</code> so that the name of the cluster is plotted on the UMAP since it can be hard to distinguish colours when we have many clusters.</p>
+<p><em>Note: Seurat always numbers clusters in order of number of cells from most cells to least cells.</em></p>
+<p>We can find these cluster labels for each cell in our metadata table.</p>
+<div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb29-1"><a href="module-5.html#cb29-1" tabindex="-1"></a><span class="fu">head</span>(seur_obj<span class="sc">@</span>meta.data)</span></code></pre></div>
+<p>We can use <code>table()</code> to see how many cells are in each cluster.</p>
+<div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb30-1"><a href="module-5.html#cb30-1" tabindex="-1"></a><span class="fu">table</span>(seur_obj<span class="sc">@</span>meta.data<span class="sc">$</span>SCT_snn_res.<span class="fl">0.8</span>)</span></code></pre></div>
+<p>The <code>seurat_clusters</code> column holds the most recent clusters, but all clusters you generate for a particular object will be stored in columns labelled with the assay, graph and resolution you used. Let’s check this by clustering at a different resolution.</p>
+<div class="sourceCode" id="cb31"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb31-1"><a href="module-5.html#cb31-1" tabindex="-1"></a>seur_obj<span class="ot">&lt;-</span><span class="fu">FindClusters</span>(seur_obj, <span class="at">resolution=</span><span class="fl">0.5</span>)</span>
+<span id="cb31-2"><a href="module-5.html#cb31-2" tabindex="-1"></a><span class="fu">head</span>(seur_obj<span class="sc">@</span>meta.data)</span>
+<span id="cb31-3"><a href="module-5.html#cb31-3" tabindex="-1"></a><span class="fu">DimPlot</span>(seur_obj)</span></code></pre></div>
+<p>Note that the “k” of the snn is not recorded in the name of these columns, so if we want to explore the effect of different “k” we’ll need save the clustering results in a column with our own name.</p>
+<div class="sourceCode" id="cb32"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb32-1"><a href="module-5.html#cb32-1" tabindex="-1"></a>seur_obj<span class="sc">@</span>meta.data<span class="sc">$</span>SCT_k20_res0<span class="fl">.8</span> <span class="ot">&lt;-</span> seur_obj<span class="sc">@</span>meta.data<span class="sc">$</span>SCT_snn_res.<span class="fl">0.8</span></span></code></pre></div>
+<div class="note">
+<p><strong>Exercise 2</strong>
+Cluster these data with resolution = 0.2, 0.5, 1, 1.5, or 2. How many clusters do you get at different resolutions?
+Cluster these data using resolution 0.8 and k=10, 20, 50. How many clusters do you get with different ks?</p>
+</div>
+</div>
+<div id="finding-optimal-clusters" class="section level3 hasAnchor">
+<h3>Finding optimal clusters<a href="module-5.html#finding-optimal-clusters" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>Once we have a bunch of different clusterings at different resolutions we want to find the “best” one. We will show you three ways to compare your clusterings to make an informed decision on what parameters to use: the silhouette index, adjusted Rand index, and marker genes.</p>
+<div id="silhouette-index" class="section level4 hasAnchor">
+<h4>Silhouette Index<a href="module-5.html#silhouette-index" class="anchor-section" aria-label="Anchor link to header"></a></h4>
+<p>For the Silhouette Index we need a matrix of all pair-wise distances between cells. We will use the same PCA dimensions as we used for clustering to calculate these distances because PCA preserves distances between datapoints. Plus, we need a set of clusters. We will get a score for each cell for how close it is to its cluster vs other clusters (high = distinct clusters, low = overlapping clusters), we can aggregate these scores across each cluster or across the entire clustering.</p>
+<div class="sourceCode" id="cb33"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb33-1"><a href="module-5.html#cb33-1" tabindex="-1"></a><span class="fu">require</span>(cluster) <span class="co"># contains silhouette function</span></span>
+<span id="cb33-2"><a href="module-5.html#cb33-2" tabindex="-1"></a>dist.matrix <span class="ot">&lt;-</span> <span class="fu">dist</span>(<span class="at">x =</span> <span class="fu">Embeddings</span>(<span class="at">object =</span> seur_obj[[<span class="st">&quot;pca&quot;</span>]])[, <span class="dv">1</span><span class="sc">:</span><span class="dv">20</span>])</span>
+<span id="cb33-3"><a href="module-5.html#cb33-3" tabindex="-1"></a>sil <span class="ot">&lt;-</span> <span class="fu">silhouette</span>(<span class="fu">as.numeric</span>(<span class="fu">as.character</span>(seur_obj<span class="sc">@</span>meta.data<span class="sc">$</span>seurat_clusters)), <span class="at">dist=</span>dist.matrix)</span>
+<span id="cb33-4"><a href="module-5.html#cb33-4" tabindex="-1"></a><span class="fu">head</span>(sil)</span>
+<span id="cb33-5"><a href="module-5.html#cb33-5" tabindex="-1"></a><span class="fu">mean</span>(sil[,<span class="dv">3</span>])</span></code></pre></div>
+<p>Overall we have a silhouette score of 0.35 for this set of clusters. The Silhouette score depends on a lot of factors so it is difficult to interpret the magnitude of the score in isolation, but positive silhouette scores are generally “good” and negative scores are “bad”.</p>
+<div class="sourceCode" id="cb34"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb34-1"><a href="module-5.html#cb34-1" tabindex="-1"></a>cluster_sil_scores <span class="ot">&lt;-</span> <span class="fu">aggregate</span>(sil[,<span class="dv">3</span>], <span class="at">by=</span><span class="fu">list</span>(sil[,<span class="dv">1</span>]), mean)</span>
+<span id="cb34-2"><a href="module-5.html#cb34-2" tabindex="-1"></a>cluster_sil_scores</span></code></pre></div>
+<p>Here we can see that most of the clusters have silhouette scores &gt; 0 except for cluster 1. This means that when we go to annotate our clusters we may want to merge cluster 1 with one of its neighbouring clusters, or that we may want to change the clustering resolution.</p>
+<div class="note">
+<p><strong>Exercise 3</strong>
+Pick 5 clusterings you have calculated, using the silhouette score what is the best clustering out of them?</p>
+</div>
+</div>
+<div id="adjusted-rand-index" class="section level4 hasAnchor">
+<h4>Adjusted Rand Index<a href="module-5.html#adjusted-rand-index" class="anchor-section" aria-label="Anchor link to header"></a></h4>
+<p>We can also look at how stable our clusters are across different clustering parameters. We usually assume that clusters that stay the same across different resolutions are more likely to represent real cell-types than those that change. We can use the Adjusted Rand Index (ARI) to measure how similar two sets of clusters are. Identical clusters will get ARI = 1, random cluster labels will get ARI = 0, generally ARI &gt; 0.8 is considered “good”.</p>
+<div class="sourceCode" id="cb35"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb35-1"><a href="module-5.html#cb35-1" tabindex="-1"></a><span class="fu">require</span>(igraph) <span class="co"># package containing ARI function</span></span>
+<span id="cb35-2"><a href="module-5.html#cb35-2" tabindex="-1"></a>ARI <span class="ot">&lt;-</span> <span class="fu">compare</span>(seur_obj<span class="sc">@</span>meta.data<span class="sc">$</span>SCT_snn_res.<span class="fl">0.8</span>, seur_obj<span class="sc">@</span>meta.data<span class="sc">$</span>SCT_snn_res.<span class="fl">0.5</span>, <span class="at">method=</span><span class="st">&quot;adjusted.rand&quot;</span>)</span>
+<span id="cb35-3"><a href="module-5.html#cb35-3" tabindex="-1"></a>ARI</span></code></pre></div>
+<div class="note">
+<p><strong>Exercise 4</strong>
+Calculate ARI between your sets of 5 clusterings, which are the most similar?</p>
+</div>
+</div>
+<div id="marker-genes" class="section level4 hasAnchor">
+<h4>Marker Genes<a href="module-5.html#marker-genes" class="anchor-section" aria-label="Anchor link to header"></a></h4>
+<p>Lastly, we can look at the number of significant marker genes we see for our clusters, more significant markers means better defined clusters. Note that by default Seurat uses several arguments to increase the speed of calculation, however these violate the assumptions of p-value calculations. This is designed for quickly annotating your cluster not for validating that your clusters are good. Fortunately, we can change these arguments to make it suitable for evaluating our clustering.</p>
+<p><em>Note: We use <code>max.cells.per.ident</code> here to speed up calculations, this is not necessary in the ordinary use of this approach</em></p>
+<div class="sourceCode" id="cb36"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb36-1"><a href="module-5.html#cb36-1" tabindex="-1"></a>markers <span class="ot">&lt;-</span> <span class="fu">FindAllMarkers</span>(seur_obj, <span class="at">group.by=</span><span class="st">&quot;SCT_snn_res.0.8&quot;</span>, <span class="at">logfc.threshold =</span> <span class="sc">-</span><span class="cn">Inf</span>, <span class="at">only.pos=</span><span class="cn">TRUE</span>, <span class="at">max.cells.per.ident=</span><span class="dv">100</span>)</span>
+<span id="cb36-2"><a href="module-5.html#cb36-2" tabindex="-1"></a>markers <span class="ot">&lt;-</span> markers[ markers[,<span class="st">&quot;p_val_adj&quot;</span>] <span class="sc">&lt;</span> <span class="fl">0.05</span>, ]</span>
+<span id="cb36-3"><a href="module-5.html#cb36-3" tabindex="-1"></a><span class="fu">table</span>(markers<span class="sc">$</span>cluster)</span></code></pre></div>
+<p>You can see that cluster #2 is poorly defined vs the other clusters.</p>
+<div class="note">
+<p>Seurat’s marker gene tool does not account for biases due to the nature of clustering which means these DE gene results should be considered as over estimates of the true number of DE genes. And this overestimate will be greater for smaller clusters than larger ones. See: DOI: 10.1016/j.cels.2019.07.012 for accurate marker gene identification after clustering accounting for these biases.</p>
+</div>
+<div class="note">
+<p><strong>Exercise 5</strong>
+For your 5 clusterings use marker genes to determine which is the best clustering.</p>
+</div>
+<div class="note">
+<p><strong>Bonus Exercise</strong>
+Compare your clustering results to those of the people around you, out of all the clusterings which do you think is the best?</p>
+</div>
+<hr />
+</div>
+</div>
+<div id="annotating-clusters" class="section level3 hasAnchor">
+<h3>Annotating Clusters<a href="module-5.html#annotating-clusters" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<div id="marker-based-annotation" class="section level4 hasAnchor">
+<h4>Marker-based Annotation<a href="module-5.html#marker-based-annotation" class="anchor-section" aria-label="Anchor link to header"></a></h4>
+<p>Once we have chosen our best clustering we need to annotate each of our clusters. The most common way to do this is to examine the top marker genes for each cluster and search various databases or the literature to determine which cell-type they most likely represent. We can check the top marker genes for each of our clusters from the results above like so:</p>
+<div class="sourceCode" id="cb37"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb37-1"><a href="module-5.html#cb37-1" tabindex="-1"></a><span class="fu">head</span>(markers[markers<span class="sc">$</span>cluster <span class="sc">==</span> <span class="st">&quot;0&quot;</span>,], <span class="dv">20</span>)</span></code></pre></div>
+<p>Then we can look them up in CellMarker 2.0 to see what cell-type this might be.</p>
+<p><strong>CellMarker Instructions:</strong>
+1. Go to: <a href="http://117.50.127.228/CellMarker/" class="uri">http://117.50.127.228/CellMarker/</a>
+2. Click “Cell Tools”
+3. Select “Cell annotation”
+4. Type marker genes into the Input box separated by just a “,” e.g. “IL32,CD3D,CD2”
+5. Set Species to “Human” (optional set Tissue to “Liver”)
+6. Press “Submit”</p>
+<p>You should be able to find that this cluster would be annotated as some kind of “T cell”.</p>
+<p>Let’s save the marker genes we used to come up with this annotation and the annotation itself so we can plot them later.</p>
+<div class="sourceCode" id="cb38"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb38-1"><a href="module-5.html#cb38-1" tabindex="-1"></a>nclusters <span class="ot">&lt;-</span> <span class="fu">length</span>(<span class="fu">unique</span>(seur_obj<span class="sc">@</span>meta.data<span class="sc">$</span>SCT_snn_res.<span class="fl">0.8</span>))</span>
+<span id="cb38-2"><a href="module-5.html#cb38-2" tabindex="-1"></a></span>
+<span id="cb38-3"><a href="module-5.html#cb38-3" tabindex="-1"></a><span class="co"># Create a vector where the names of the vector are the cluster number</span></span>
+<span id="cb38-4"><a href="module-5.html#cb38-4" tabindex="-1"></a><span class="co"># and the values of the vector are the annotated names.</span></span>
+<span id="cb38-5"><a href="module-5.html#cb38-5" tabindex="-1"></a>cluster_annotation <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="st">&quot;unannotated&quot;</span>, nclusters)</span>
+<span id="cb38-6"><a href="module-5.html#cb38-6" tabindex="-1"></a><span class="fu">names</span>(cluster_annotation) <span class="ot">&lt;-</span> <span class="fu">levels</span>(seur_obj<span class="sc">@</span>meta.data<span class="sc">$</span>SCT_snn_res.<span class="fl">0.8</span>)</span>
+<span id="cb38-7"><a href="module-5.html#cb38-7" tabindex="-1"></a></span>
+<span id="cb38-8"><a href="module-5.html#cb38-8" tabindex="-1"></a><span class="co"># Fill in the annotation for the first cluster</span></span>
+<span id="cb38-9"><a href="module-5.html#cb38-9" tabindex="-1"></a>cluster_annotation[<span class="st">&quot;0&quot;</span>] <span class="ot">&lt;-</span> <span class="st">&quot;T cell&quot;</span></span>
+<span id="cb38-10"><a href="module-5.html#cb38-10" tabindex="-1"></a></span>
+<span id="cb38-11"><a href="module-5.html#cb38-11" tabindex="-1"></a><span class="co"># Save the genes we used for annotation</span></span>
+<span id="cb38-12"><a href="module-5.html#cb38-12" tabindex="-1"></a>anno_genes <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="st">&quot;cluster0&quot;</span><span class="ot">=</span><span class="fu">c</span>(<span class="st">&quot;CD3D&quot;</span>,<span class="st">&quot;CD3G&quot;</span>, <span class="st">&quot;TRAC&quot;</span>, <span class="st">&quot;CCL5&quot;</span>, <span class="st">&quot;GZMK&quot;</span>, <span class="st">&quot;RUNX3&quot;</span>))</span></code></pre></div>
+<div class="note">
+<p><strong>Exercise 6</strong>
+Annotate clusters 2,4,6,9 and 10 using CellMarker.</p>
+</div>
+<p>Once all the clusters have been annotated we can rename our clusters in our seurat object:</p>
+<div class="sourceCode" id="cb39"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb39-1"><a href="module-5.html#cb39-1" tabindex="-1"></a>seur_obj <span class="ot">=</span> <span class="fu">SetIdent</span>(seur_obj, <span class="at">value=</span>seur_obj<span class="sc">@</span>meta.data<span class="sc">$</span>SCT_snn_res.<span class="fl">0.8</span>)</span>
+<span id="cb39-2"><a href="module-5.html#cb39-2" tabindex="-1"></a>seur_obj <span class="ot">=</span> <span class="fu">RenameIdents</span>(seur_obj, cluster_annotation)</span>
+<span id="cb39-3"><a href="module-5.html#cb39-3" tabindex="-1"></a>seur_obj<span class="sc">@</span>meta.data<span class="sc">$</span>manual_anno <span class="ot">&lt;-</span> <span class="fu">Idents</span>(seur_obj)</span>
+<span id="cb39-4"><a href="module-5.html#cb39-4" tabindex="-1"></a><span class="fu">head</span>(seur_obj<span class="sc">@</span>meta.data)</span></code></pre></div>
+<p>We can visualize our marker gene annotation using a DotPlot:</p>
+<div class="sourceCode" id="cb40"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb40-1"><a href="module-5.html#cb40-1" tabindex="-1"></a><span class="fu">DotPlot</span>(seur_obj, <span class="at">features=</span><span class="fu">unique</span>(<span class="fu">unlist</span>(anno_genes)))</span></code></pre></div>
+<div class="note">
+<p><strong>Exercise 7</strong>
+How many of your marker genes were shared between multiple clusters?</p>
+</div>
+</div>
+</div>
+<div id="reference-based-annotation" class="section level3 hasAnchor">
+<h3>Reference based annotation<a href="module-5.html#reference-based-annotation" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>There are many tools to compare single-cell data to a reference but here we’ll cover the most simple approach which is simply looking at correlations between the average gene expression in your clusters vs the average gene expression from a reference dataset.</p>
+<p>First let’s load our reference dataset:</p>
+<div class="sourceCode" id="cb41"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb41-1"><a href="module-5.html#cb41-1" tabindex="-1"></a>ref <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="st">&quot;~/CourseData/Human_Liver/MacParlandLiverAtlas_celltype_profiles.rds&quot;</span>)</span>
+<span id="cb41-2"><a href="module-5.html#cb41-2" tabindex="-1"></a><span class="fu">head</span>(ref)</span></code></pre></div>
+<p>Next we calculate the average expression of each gene in each of our clusters.</p>
+<div class="sourceCode" id="cb42"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb42-1"><a href="module-5.html#cb42-1" tabindex="-1"></a>query <span class="ot">=</span> <span class="fu">AverageExpression</span>(seur_obj, <span class="at">group.by =</span> <span class="st">&quot;SCT_snn_res.0.8&quot;</span>, <span class="at">assays=</span><span class="st">&quot;RNA&quot;</span>) <span class="co"># we use RNA b/c our reference was not normalized using SCT.</span></span>
+<span id="cb42-2"><a href="module-5.html#cb42-2" tabindex="-1"></a><span class="fu">head</span>(query<span class="sc">$</span>RNA)</span></code></pre></div>
+<p>Now we need to select a subset of genes that are biologically relevant (i.e. HVGs) and are present in both datasets, and ensure both the reference and our data are subset to just those genes and the genes are in the same order.</p>
+<div class="sourceCode" id="cb43"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb43-1"><a href="module-5.html#cb43-1" tabindex="-1"></a>genes <span class="ot">=</span> <span class="fu">VariableFeatures</span>(seur_obj);</span>
+<span id="cb43-2"><a href="module-5.html#cb43-2" tabindex="-1"></a>genes <span class="ot">=</span> genes[genes <span class="sc">%in%</span> <span class="fu">rownames</span>(ref)]</span>
+<span id="cb43-3"><a href="module-5.html#cb43-3" tabindex="-1"></a></span>
+<span id="cb43-4"><a href="module-5.html#cb43-4" tabindex="-1"></a>query2 <span class="ot">=</span> query<span class="sc">$</span>RNA[<span class="fu">match</span>(genes, <span class="fu">rownames</span>(query<span class="sc">$</span>RNA)),]</span>
+<span id="cb43-5"><a href="module-5.html#cb43-5" tabindex="-1"></a>ref2 <span class="ot">=</span> ref[<span class="fu">match</span>(genes, <span class="fu">rownames</span>(ref)),]</span>
+<span id="cb43-6"><a href="module-5.html#cb43-6" tabindex="-1"></a><span class="fu">identical</span>(<span class="fu">rownames</span>(ref2), <span class="fu">rownames</span>(query2))</span></code></pre></div>
+<p>Now we can correlate them with each other.</p>
+<div class="sourceCode" id="cb44"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb44-1"><a href="module-5.html#cb44-1" tabindex="-1"></a>cross_cors <span class="ot">=</span> <span class="fu">cor</span>(<span class="fu">as.matrix</span>(query2), <span class="fu">as.matrix</span>(ref2))</span>
+<span id="cb44-2"><a href="module-5.html#cb44-2" tabindex="-1"></a><span class="fu">heatmap</span>(cross_cors, <span class="at">scale=</span><span class="st">&quot;none&quot;</span>, <span class="at">margins =</span> <span class="fu">c</span>(<span class="dv">12</span>,<span class="dv">4</span>))</span></code></pre></div>
+<p>Using these correlations we can quickly annotate most of our clusters to at least a general cell-type.</p>
+<div class="sourceCode" id="cb45"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb45-1"><a href="module-5.html#cb45-1" tabindex="-1"></a><span class="co"># Create a vector where the names of the vector are the cluster number</span></span>
+<span id="cb45-2"><a href="module-5.html#cb45-2" tabindex="-1"></a><span class="co"># and the values of the vector are the annotated names.</span></span>
+<span id="cb45-3"><a href="module-5.html#cb45-3" tabindex="-1"></a>cluster_annotation2 <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="st">&quot;unannotated&quot;</span>, nclusters)</span>
+<span id="cb45-4"><a href="module-5.html#cb45-4" tabindex="-1"></a><span class="fu">names</span>(cluster_annotation2) <span class="ot">&lt;-</span> <span class="fu">levels</span>(seur_obj<span class="sc">@</span>meta.data<span class="sc">$</span>SCT_snn_res.<span class="fl">0.8</span>)</span>
+<span id="cb45-5"><a href="module-5.html#cb45-5" tabindex="-1"></a>cluster_annotation2[<span class="st">&quot;0&quot;</span>] <span class="ot">=</span> <span class="st">&quot;T cell&quot;</span></span>
+<span id="cb45-6"><a href="module-5.html#cb45-6" tabindex="-1"></a>cluster_annotation2[<span class="st">&quot;1&quot;</span>] <span class="ot">=</span> <span class="st">&quot;T cell&quot;</span></span>
+<span id="cb45-7"><a href="module-5.html#cb45-7" tabindex="-1"></a>cluster_annotation2[<span class="st">&quot;2&quot;</span>] <span class="ot">=</span> <span class="st">&quot;T cell&quot;</span></span>
+<span id="cb45-8"><a href="module-5.html#cb45-8" tabindex="-1"></a>cluster_annotation2[<span class="st">&quot;3&quot;</span>] <span class="ot">=</span> <span class="st">&quot;InfMac&quot;</span></span>
+<span id="cb45-9"><a href="module-5.html#cb45-9" tabindex="-1"></a>cluster_annotation2[<span class="st">&quot;4&quot;</span>] <span class="ot">=</span> <span class="st">&quot;NK cell&quot;</span></span>
+<span id="cb45-10"><a href="module-5.html#cb45-10" tabindex="-1"></a>cluster_annotation2[<span class="st">&quot;5&quot;</span>] <span class="ot">=</span> <span class="st">&quot;gdT cell&quot;</span></span>
+<span id="cb45-11"><a href="module-5.html#cb45-11" tabindex="-1"></a>cluster_annotation2[<span class="st">&quot;6&quot;</span>] <span class="ot">=</span> <span class="st">&quot;CD3T cell&quot;</span></span>
+<span id="cb45-12"><a href="module-5.html#cb45-12" tabindex="-1"></a>cluster_annotation2[<span class="st">&quot;7&quot;</span>] <span class="ot">=</span> <span class="st">&quot;B/T cell&quot;</span></span>
+<span id="cb45-13"><a href="module-5.html#cb45-13" tabindex="-1"></a>cluster_annotation2[<span class="st">&quot;8&quot;</span>] <span class="ot">=</span> <span class="st">&quot;B cell&quot;</span></span>
+<span id="cb45-14"><a href="module-5.html#cb45-14" tabindex="-1"></a>cluster_annotation2[<span class="st">&quot;9&quot;</span>] <span class="ot">=</span> <span class="st">&quot;Endothelial&quot;</span></span>
+<span id="cb45-15"><a href="module-5.html#cb45-15" tabindex="-1"></a>cluster_annotation2[<span class="st">&quot;10&quot;</span>] <span class="ot">=</span> <span class="st">&quot;Macrophage&quot;</span></span>
+<span id="cb45-16"><a href="module-5.html#cb45-16" tabindex="-1"></a>cluster_annotation2[<span class="st">&quot;11&quot;</span>] <span class="ot">=</span> <span class="st">&quot;Hepatocyte&quot;</span></span>
+<span id="cb45-17"><a href="module-5.html#cb45-17" tabindex="-1"></a>cluster_annotation2[<span class="st">&quot;12&quot;</span>] <span class="ot">=</span> <span class="st">&quot;AntiB&quot;</span></span>
+<span id="cb45-18"><a href="module-5.html#cb45-18" tabindex="-1"></a>cluster_annotation2[<span class="st">&quot;13&quot;</span>] <span class="ot">=</span> <span class="st">&quot;cvLSEC&quot;</span></span>
+<span id="cb45-19"><a href="module-5.html#cb45-19" tabindex="-1"></a>cluster_annotation2[<span class="st">&quot;14&quot;</span>] <span class="ot">=</span> <span class="st">&quot;Erythroid&quot;</span></span>
+<span id="cb45-20"><a href="module-5.html#cb45-20" tabindex="-1"></a>cluster_annotation2[<span class="st">&quot;15&quot;</span>] <span class="ot">=</span> <span class="st">&quot;Cholangio&quot;</span></span>
+<span id="cb45-21"><a href="module-5.html#cb45-21" tabindex="-1"></a></span>
+<span id="cb45-22"><a href="module-5.html#cb45-22" tabindex="-1"></a>seur_obj <span class="ot">=</span> <span class="fu">SetIdent</span>(seur_obj, <span class="at">value=</span>seur_obj<span class="sc">@</span>meta.data<span class="sc">$</span>SCT_snn_res.<span class="fl">0.8</span>)</span>
+<span id="cb45-23"><a href="module-5.html#cb45-23" tabindex="-1"></a>seur_obj <span class="ot">=</span> <span class="fu">RenameIdents</span>(seur_obj, cluster_annotation2)</span>
+<span id="cb45-24"><a href="module-5.html#cb45-24" tabindex="-1"></a>seur_obj<span class="sc">@</span>meta.data<span class="sc">$</span>ref_anno <span class="ot">&lt;-</span> <span class="fu">Idents</span>(seur_obj)</span>
+<span id="cb45-25"><a href="module-5.html#cb45-25" tabindex="-1"></a><span class="fu">head</span>(seur_obj<span class="sc">@</span>meta.data)</span></code></pre></div>
+<div class="note">
+<p><strong>Exercise 8</strong>
+How many genes did we use for our correlations?
+How do your manual annotations compare to the annotations you got from using the reference data?</p>
+</div>
+<div class="note">
+<p><strong>Exercise 9</strong>
+Repeat the cell-type x cluster correlations but this time use the marker genes you collected during manual annotation. Do your annotation change?</p>
+</div>
+</div>
+<div id="differential-expression" class="section level3 hasAnchor">
+<h3>Differential Expression<a href="module-5.html#differential-expression" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<div id="data" class="section level4 hasAnchor">
+<h4>Data<a href="module-5.html#data" class="anchor-section" aria-label="Anchor link to header"></a></h4>
+<p>So far we’ve only been using one sample for our analysis. To perform differential expression we will need multiple samples. For this we will use some multiplexed mouse brain data from 10X Genomics (see: <a href="https://www.10xgenomics.com/resources/datasets" class="uri">https://www.10xgenomics.com/resources/datasets</a>) : Mouse E18 Combined Cortex, Hippocampus and Subventricular Zone Nuclei Multiplexed, 12 CMOs: 3’v3.1 Targeted, Custom Neuroscience Panel</p>
+<p>This data contains single nucleus RNAseq data from 3 multiplexed replicates of mouse brain tissue from 4 different mice. We have already QCed, Normalized, Clustered and Annotated these data for you (see: 10XMouseBrain.Rhistory for how we processed the data).</p>
+<p>This data will allow us to examine how much variability there is between individual mice, compared to technical variability between our replicates.</p>
+<div class="sourceCode" id="cb46"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb46-1"><a href="module-5.html#cb46-1" tabindex="-1"></a>mouse_brain_obj <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="st">&quot;~/CourseData/MouseBrain_with_Replicates_Annotated.rds&quot;</span>)</span></code></pre></div>
+</div>
+</div>
+<div id="pseudobulks" class="section level3 hasAnchor">
+<h3>Pseudobulks<a href="module-5.html#pseudobulks" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>To calculate pseudobulk expression we will use our package: MultiPath (currently in beta-testing). Let’s load it now:</p>
+<div class="sourceCode" id="cb47"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb47-1"><a href="module-5.html#cb47-1" tabindex="-1"></a><span class="fu">require</span>(MultiPath)</span></code></pre></div>
+<p>Now let’s choose a cell-type will will perform DE for. First check which cell-types are present in the data.</p>
+<div class="sourceCode" id="cb48"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb48-1"><a href="module-5.html#cb48-1" tabindex="-1"></a><span class="fu">head</span>(mouse_brain_obj<span class="sc">@</span>meta.data)</span>
+<span id="cb48-2"><a href="module-5.html#cb48-2" tabindex="-1"></a><span class="fu">table</span>(mouse_brain_obj<span class="sc">@</span>meta.data<span class="sc">$</span>cell_type)</span></code></pre></div>
+<p>We’ll use Astrocytes for this demonstration.</p>
+<div class="sourceCode" id="cb49"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb49-1"><a href="module-5.html#cb49-1" tabindex="-1"></a>type <span class="ot">=</span> <span class="st">&quot;Astrocytes&quot;</span></span>
+<span id="cb49-2"><a href="module-5.html#cb49-2" tabindex="-1"></a>subset_obj <span class="ot">&lt;-</span> mouse_brain_obj[,mouse_brain_obj<span class="sc">@</span>meta.data<span class="sc">$</span>cell_type<span class="sc">==</span>type]</span></code></pre></div>
+<p>Now we need to choose how to aggregate the data. Typically we would aggregate by individual if we were doing case-control (i.e. “Mouse”), however in this experiment we don’t have case-control rather we have multiple replicates (“feature_call”) and different mice as our biological condition.</p>
+<div class="sourceCode" id="cb50"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb50-1"><a href="module-5.html#cb50-1" tabindex="-1"></a><span class="fu">table</span>( subset_obj<span class="sc">@</span>meta.data<span class="sc">$</span>feature_call, subset_obj<span class="sc">@</span>meta.data<span class="sc">$</span>Mouse)</span>
+<span id="cb50-2"><a href="module-5.html#cb50-2" tabindex="-1"></a><span class="co">#CMOs are sample-identifying molecular barcodes used to multiplex multiple biological samples in one sequencing run</span></span></code></pre></div>
+<p>Here you can see the replicate x biological condition for our experiment. We will use our <code>group_rowmeans</code> function to calculate the pseudobulks.</p>
+<p>We need to give the function an expression matrix (MAT), a vector of group labels (group_labs) and tell it whether to calculate the mean or the sum within each group. We can use it to calculate pseudobulks like this:</p>
+<div class="sourceCode" id="cb51"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb51-1"><a href="module-5.html#cb51-1" tabindex="-1"></a>pseudobulks <span class="ot">&lt;-</span> <span class="fu">group_rowmeans</span>(subset_obj<span class="sc">@</span>assays<span class="sc">$</span>RNA<span class="sc">@</span>counts, subset_obj<span class="sc">@</span>meta.data<span class="sc">$</span>feature_call, <span class="at">type=</span><span class="st">&quot;sum&quot;</span>)</span>
+<span id="cb51-2"><a href="module-5.html#cb51-2" tabindex="-1"></a><span class="fu">head</span>(pseudobulks)</span></code></pre></div>
+<p>Let’s remove unexpressed genes to save us some time when we do the differential expression:</p>
+<div class="sourceCode" id="cb52"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb52-1"><a href="module-5.html#cb52-1" tabindex="-1"></a>pseudobulks_filt <span class="ot">&lt;-</span> pseudobulks[<span class="fu">rowSums</span>(pseudobulks <span class="sc">&gt;</span> <span class="dv">0</span>) <span class="sc">&gt;</span> <span class="dv">3</span>,]</span></code></pre></div>
+<div class="note">
+<p><strong>Exercise 10</strong>
+What is the condition we are using above to filter genes? How many genes are filtered out?</p>
+</div>
+<p>Now lets set up our differential expression. First we need to create a vector of the biological condition for each column of our pseudobulks. We can do this manually using by looking at our metadata.</p>
+<div class="sourceCode" id="cb53"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb53-1"><a href="module-5.html#cb53-1" tabindex="-1"></a><span class="fu">table</span>( subset_obj<span class="sc">@</span>meta.data<span class="sc">$</span>feature_call, subset_obj<span class="sc">@</span>meta.data<span class="sc">$</span>Mouse)</span>
+<span id="cb53-2"><a href="module-5.html#cb53-2" tabindex="-1"></a><span class="fu">colnames</span>(pseudobulks_filt)</span>
+<span id="cb53-3"><a href="module-5.html#cb53-3" tabindex="-1"></a>bio_condition <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;Mouse1&quot;</span>,<span class="st">&quot;Mouse1&quot;</span>,<span class="st">&quot;Mouse1&quot;</span>,</span>
+<span id="cb53-4"><a href="module-5.html#cb53-4" tabindex="-1"></a>                   <span class="st">&quot;Mouse2&quot;</span>,<span class="st">&quot;Mouse2&quot;</span>,<span class="st">&quot;Mouse2&quot;</span>,</span>
+<span id="cb53-5"><a href="module-5.html#cb53-5" tabindex="-1"></a>                   <span class="st">&quot;Mouse3&quot;</span>,<span class="st">&quot;Mouse3&quot;</span>,<span class="st">&quot;Mouse3&quot;</span>,</span>
+<span id="cb53-6"><a href="module-5.html#cb53-6" tabindex="-1"></a>                   <span class="st">&quot;Mouse4&quot;</span>,<span class="st">&quot;Mouse4&quot;</span>,<span class="st">&quot;Mouse4&quot;</span>)</span></code></pre></div>
+<p>We could also do this automatically using <code>apply</code> function but that’s beyond the scope of this course.</p>
+<div class="note">
+<p><strong>Bonus Exercise</strong>
+Create the bio_condition vector from the <code>colnames()</code> of <code>pseudobulk_filt</code> computationally using the metadata table.</p>
+</div>
+</div>
+<div id="edger" class="section level3 hasAnchor">
+<h3>EdgeR<a href="module-5.html#edger" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<p>Now that we have our pseudobulks and biological condition vector we only need to run edgeR (or other bulk RNAseq DE tool.)</p>
+<div class="sourceCode" id="cb54"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb54-1"><a href="module-5.html#cb54-1" tabindex="-1"></a><span class="fu">require</span>(edgeR)</span></code></pre></div>
+<p>First define our model:</p>
+<div class="sourceCode" id="cb55"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb55-1"><a href="module-5.html#cb55-1" tabindex="-1"></a>design <span class="ot">&lt;-</span> <span class="fu">model.matrix</span>(<span class="sc">~</span>bio_condition)</span>
+<span id="cb55-2"><a href="module-5.html#cb55-2" tabindex="-1"></a><span class="fu">head</span>(design)</span></code></pre></div>
+<p>Here you can see this has defined our four “B”s for us. B0 = Intercept (Mous1), B1 = Mouse2-Mouse1, B2 = Mouse3-Mouse1, B3=Mouse4-Mouse1.</p>
+<p>Next we create a “DGEList” for edgeR, and estimate the library size that will be used by the model to correct for the library size.</p>
+<div class="sourceCode" id="cb56"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb56-1"><a href="module-5.html#cb56-1" tabindex="-1"></a>pseudobulk_dge <span class="ot">&lt;-</span> <span class="fu">DGEList</span>(<span class="at">counts=</span>pseudobulks_filt, <span class="at">group=</span>bio_condition)</span>
+<span id="cb56-2"><a href="module-5.html#cb56-2" tabindex="-1"></a>pseudobulk_dge <span class="ot">&lt;-</span> <span class="fu">calcNormFactors</span>(pseudobulk_dge)</span></code></pre></div>
+<p>Then we fit the model:</p>
+<div class="sourceCode" id="cb57"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb57-1"><a href="module-5.html#cb57-1" tabindex="-1"></a>pseudobulk_dge <span class="ot">&lt;-</span> <span class="fu">estimateDisp</span>(pseudobulk_dge, design)</span>
+<span id="cb57-2"><a href="module-5.html#cb57-2" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">glmQLFit</span>(pseudobulk_dge)</span></code></pre></div>
+<p>And obtain the DE genes for each mouse vs the reference mouse (our “Bs”)</p>
+<div class="sourceCode" id="cb58"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb58-1"><a href="module-5.html#cb58-1" tabindex="-1"></a>res_2vs1 <span class="ot">&lt;-</span> <span class="fu">glmQLFTest</span>(fit, <span class="at">coef=</span><span class="dv">2</span>) <span class="co">#You are testing Mouse2 vs Mouse1 (reference)</span></span>
+<span id="cb58-2"><a href="module-5.html#cb58-2" tabindex="-1"></a><span class="fu">topTags</span>(res_2vs1, <span class="dv">20</span>)</span></code></pre></div>
+<div class="note">
+<p><strong>Exercise 11</strong>
+Which of the four mice are male? which are female?
+(hint: Xist is only highly expressed in females)</p>
+</div>
+<div class="note">
+<p><strong>Exercise 12</strong>
+How many genes are differentially expressed (FDR5%) between our mice?</p>
+</div>
+<div class="note">
+<p><strong>Bonus Exercise</strong>
+Do Inhibitory Neurons have the same differentially expressed genes between Mouse 1 and Mouse 2 as Astrocytes?</p>
+</div>
+</div>
+<div id="overview-1" class="section level3 hasAnchor">
+<h3>Overview<a href="module-5.html#overview-1" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<div class="highlight">
+<p><strong>KEY POINTS</strong>
+- There are two key parameters for Louvain clustering:
+- k for the sNN
+- res for the clustering algorithm</p>
+<ul>
+<li><p>We can use a variety of metrics to determine the best clustering parameter, and/or to guide our annotation</p></li>
+<li><p>Clusters can be annotated by comparing to a reference dataset, or by cross referencing marker genes with the literature or databases.</p></li>
+<li><p>Pseudobulk approaches allow us to use bulk RNAseq differential expression tools to identify cell-type specific differential expression between biological conditions.</p></li>
+</ul>
+</div>
+
+</div>
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="module-4.html" class="navigation navigation-prev navigation-unique" aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/clipboard.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-clipboard.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+  "sharing": {
+    "github": false,
+    "facebook": false,
+    "twitter": false,
+    "linkedin": false,
+    "weibo": false,
+    "instapaper": false,
+    "vk": false,
+    "whatsapp": false,
+    "all": ["facebook", "twitter", "linkedin", "weibo", "instapaper"]
+  },
+  "fontsettings": {
+    "theme": "white",
+    "family": "sans",
+    "size": 2
+  },
+  "edit": {
+    "link": "https://github.com/bioinformaticsdotca/scRNA_WinTo-2606/blob/main/050-module-5.Rmd",
+    "text": "Edit"
+  },
+  "history": {
+    "link": null,
+    "text": null
+  },
+  "view": {
+    "link": null,
+    "text": null
+  },
+  "download": ["_main.pdf", "_main.epub"],
+  "search": {
+    "engine": "fuse",
+    "options": null
+  },
+  "toc": {
+    "collapse": "subsection"
+  }
+});
+});
+</script>
+
+</body>
+
+</html>
