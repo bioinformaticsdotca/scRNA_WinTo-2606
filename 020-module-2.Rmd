@@ -280,7 +280,7 @@ barplot(t(tab/rowSums(tab)), ylab="% of cells", xlab="Cluster")
 In general, it is better to visualize per-cluster measures as a barplot rather than as a UMAP or tSNE because individual cells will be plotted on top of each other in the UMAP and the order of plotting determines which colour you actually see, which can result in misleading figures.
 
 :::Exercise 4
-Rerun DoubletFinger using pN=0.25 and pK=0.2. How does this change your results?
+Rerun DoubletFinder using pN=0.25 and pK=0.2. How does this change your results?
 1) Does the number of droplets identified at Doublets/Singlets change?
 2) What is the overlap between droplets assigned as Doublets between the two runs?
 3) What is the correlation between the pANN between the two runs? (Hint: the `cor()` function calculates correlations between two vectors.)

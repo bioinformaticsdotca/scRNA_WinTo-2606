@@ -442,7 +442,7 @@ Reduce the threshold on mitochondrial RNA to 20%. How many additional cells does
 <span id="cb49-2"><a href="module-2.html#cb49-2" tabindex="-1"></a><span class="fu">barplot</span>(<span class="fu">t</span>(tab<span class="sc">/</span><span class="fu">rowSums</span>(tab)), <span class="at">ylab=</span><span class="st">&quot;% of cells&quot;</span>, <span class="at">xlab=</span><span class="st">&quot;Cluster&quot;</span>)</span></code></pre></div>
 <p>In general, it is better to visualize per-cluster measures as a barplot rather than as a UMAP or tSNE because individual cells will be plotted on top of each other in the UMAP and the order of plotting determines which colour you actually see, which can result in misleading figures.</p>
 <p>:::Exercise 4
-Rerun DoubletFinger using pN=0.25 and pK=0.2. How does this change your results?
+Rerun DoubletFinder using pN=0.25 and pK=0.2. How does this change your results?
 1) Does the number of droplets identified at Doublets/Singlets change?
 2) What is the overlap between droplets assigned as Doublets between the two runs?
 3) What is the correlation between the pANN between the two runs? (Hint: the <code>cor()</code> function calculates correlations between two vectors.)
