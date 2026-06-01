@@ -1,7 +1,10 @@
 # Module 2
 
+QC, Doublet Detection (DoubletFinder), EmptyDrops & identifying cells
+
 ## Lecture
 
+<iframe src="https://drive.google.com/file/d/1luGySMuF48HdommETRvvz2v2Q5a867sW/preview" width="640" height="480" allow="autoplay"></iframe>  
 
 ## Lab
 

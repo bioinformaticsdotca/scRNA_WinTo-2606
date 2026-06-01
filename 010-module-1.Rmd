@@ -1,18 +1,20 @@
 ###(PART) Modules {-}
 
-# Module 1
+# Module 1 
+
+Intro to R & Seurat Objects
 
 ## Lecture
 
 <!--<iframe width="640" height="360" src="YOUTUBE EMBED LINK" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 -->
 
-<!--<iframe src="GOOGLE SLIDES LINK/preview" width="640" height="480" allow="autoplay"></iframe>  
+<iframe src="https://drive.google.com/file/d/1KnI8n5pBH256_zaR-Ao0o2MB2xP7CYTz/preview" width="640" height="480" allow="autoplay"></iframe>  
 -->
 
 ## Lab
 
-
+<iframe src="https://drive.google.com/file/d/1b0Iq7QqcLYnaTtOFMNnj_4Xsa-9pL6G1/preview" width="640" height="480" allow="autoplay"></iframe>  
 
 ### scRNA-seq Analysis: datastructures
 
