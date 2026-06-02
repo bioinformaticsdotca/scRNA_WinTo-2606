@@ -113,7 +113,7 @@ Notice how many more clusters are visible in these plots compared to PCA. How ma
 What happens when you change the perplexity used by tSNE to 5, or 100? Do you still see the same number of clusters?
 :::
 
-####UMAP
+#### UMAP
 
 
 ```{r, eval=FALSE}
