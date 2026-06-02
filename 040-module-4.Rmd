@@ -4,7 +4,7 @@ Visualization - Tnse & UMAP & destiny/diffusion maps
 
 ## Lecture
 
-<iframe src="https://drive.google.com/file/d/1pLMTPBKA-qJ91pZ69f1X-gBPC-oORziZ/preview" width="640" height="480" allow="autoplay"></iframe> 
+<iframe src="https://drive.google.com/file/d/1rJNgUhyPy2FRSS6mzgwdC-U3TcOYGLri/preview" width="640" height="480" allow="autoplay"></iframe> 
 
 ## Lab
 
