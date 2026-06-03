@@ -4,7 +4,7 @@ Normalization & PCA
 
 ## Lecture
 
-<iframe src="https://drive.google.com/file/d/13gNH0F_9MogubfMbr6O-jUkZ5jiqiKF0/preview" width="640" height="480" allow="autoplay"></iframe> 
+<iframe src="https://docs.google.com/presentation/d/14A2D6KVPwsTrL4niOMiLz49p8MAOfr9G/preview" width="640" height="480" allow="autoplay"></iframe> 
 
 ## Lab
 
