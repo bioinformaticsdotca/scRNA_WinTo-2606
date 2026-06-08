@@ -4,6 +4,9 @@ QC, Doublet Detection (DoubletFinder), EmptyDrops & identifying cells
 
 ## Lecture
 
+<iframe width="640" height="360" src="https://www.youtube.com/embed/-OK0Ga5RttQ?si=e5xhvo6JyQNQ1fow" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+
+
 <iframe src="https://docs.google.com/presentation/d/1P4U2yJlM50eesMBtLXrhUEx1N3IvLHOY/preview" width="640" height="480" allow="autoplay"></iframe>  
 
 ## Lab

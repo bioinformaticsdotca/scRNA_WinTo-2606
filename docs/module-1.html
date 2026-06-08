@@ -6,7 +6,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <title>Module 1 | Single Cell RNA-seq Analysis 2026</title>
   <meta name="description" content="Workshop website for the 2026 Single Cell RNA-seq Analysis Canadian Bioinformatics Workshop" />
-  <meta name="generator" content="bookdown 0.45 and GitBook 2.6.7" />
+  <meta name="generator" content="bookdown 0.46 and GitBook 2.6.7" />
 
   <meta property="og:title" content="Module 1 | Single Cell RNA-seq Analysis 2026" />
   <meta property="og:type" content="book" />
@@ -77,8 +77,9 @@
 
 
 <style type="text/css">
+html { -webkit-text-size-adjust: 100%; }
 pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
 code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -88,7 +89,7 @@ div.sourceCode { overflow: auto; }
 }
 @media print {
 pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
 }
 pre.numberSource code
   { counter-reset: source-line 0; }
@@ -283,6 +284,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <h2>Lecture<a href="module-1.html#lecture" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <!--<iframe width="640" height="360" src="YOUTUBE EMBED LINK" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 -->
+<iframe width="640" height="360" src="https://www.youtube.com/embed/WUq-Ft5OWGI?si=WaLIP4OIZC7OhDac" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen>
+</iframe>
 <iframe src="https://docs.google.com/presentation/d/1JW0HjHd2gOUbmr_8LcXgR2hQBQs5j04W/preview" width="640" height="480" allow="autoplay">
 </iframe>
 <p>–&gt;</p>
@@ -604,35 +607,35 @@ For example <code>seur_obj@assays$RNA@counts</code></p></li>
 View session info
 </summary>
 <pre><code>## R version 4.4.2 (2024-10-31)
-## Platform: aarch64-apple-darwin20
-## Running under: macOS 26.4.1
+## Platform: x86_64-apple-darwin20
+## Running under: macOS Sequoia 15.7.7
 ## 
 ## Matrix products: default
-## BLAS:   /Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/lib/libRblas.0.dylib 
-## LAPACK: /Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/lib/libRlapack.dylib;  LAPACK version 3.12.0
+## BLAS:   /Library/Frameworks/R.framework/Versions/4.4-x86_64/Resources/lib/libRblas.0.dylib 
+## LAPACK: /Library/Frameworks/R.framework/Versions/4.4-x86_64/Resources/lib/libRlapack.dylib;  LAPACK version 3.12.0
 ## 
 ## locale:
 ## [1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
 ## 
-## time zone: America/Winnipeg
+## time zone: America/Toronto
 ## tzcode source: internal
 ## 
 ## attached base packages:
 ## [1] stats     graphics  grDevices utils     datasets  methods   base     
 ## 
 ## other attached packages:
-## [1] htmltools_0.5.8.1 jsonlite_2.0.0    readr_2.1.5      
+## [1] htmltools_0.5.9 jsonlite_2.0.0  readr_2.2.0    
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] crayon_1.5.3      vctrs_0.6.5       cli_3.6.5         knitr_1.50       
-##  [5] rlang_1.1.6       xfun_0.54         bit_4.6.0         glue_1.8.0       
-##  [9] sass_0.4.10       hms_1.1.4         rmarkdown_2.30    evaluate_1.0.5   
-## [13] jquerylib_0.1.4   tibble_3.3.1      tzdb_0.5.0        fastmap_1.2.0    
-## [17] yaml_2.3.10       lifecycle_1.0.4   bookdown_0.45     compiler_4.4.2   
-## [21] pkgconfig_2.0.3   rstudioapi_0.17.1 digest_0.6.38     R6_2.6.1         
-## [25] tidyselect_1.2.1  parallel_4.4.2    vroom_1.6.6       pillar_1.11.1    
-## [29] magrittr_2.0.4    bslib_0.9.0       bit64_4.6.0-1     tools_4.4.2      
-## [33] cachem_1.1.0</code></pre>
+##  [1] crayon_1.5.3      vctrs_0.7.3       cli_3.6.6         knitr_1.51       
+##  [5] rlang_1.2.0       xfun_0.57         otel_0.2.0        bit_4.6.0        
+##  [9] glue_1.8.1        sass_0.4.10       hms_1.1.4         rmarkdown_2.31   
+## [13] evaluate_1.0.5    jquerylib_0.1.4   tibble_3.3.1      tzdb_0.5.0       
+## [17] fastmap_1.2.0     yaml_2.3.12       lifecycle_1.0.5   bookdown_0.46    
+## [21] compiler_4.4.2    pkgconfig_2.0.3   rstudioapi_0.18.0 digest_0.6.39    
+## [25] R6_2.6.1          tidyselect_1.2.1  parallel_4.4.2    vroom_1.7.1      
+## [29] pillar_1.11.1     magrittr_2.0.5    bslib_0.10.0      bit64_4.8.0      
+## [33] tools_4.4.2       cachem_1.1.0</code></pre>
 </details>
 
 </div>
